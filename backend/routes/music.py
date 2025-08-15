@@ -64,6 +64,68 @@ def get_user_playlists():
         user_id = get_jwt_identity()
         db = get_db()
         
+        # Demo mode - return sample playlists
+        if db is None:
+            demo_playlists = [
+                {
+                    'id': 'demo_playlist_1',
+                    'mood': 'calm',
+                    'intensity': 6,
+                    'tracks_count': 15,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'playlist': {
+                        'mood': 'calm',
+                        'intensity': 6,
+                        'tracks': [
+                            {'name': 'Weightless', 'artist': 'Marconi Union'},
+                            {'name': 'Claire de Lune', 'artist': 'Debussy'},
+                            {'name': 'River Flows in You', 'artist': 'Yiruma'}
+                        ]
+                    }
+                },
+                {
+                    'id': 'demo_playlist_2',
+                    'mood': 'happy',
+                    'intensity': 8,
+                    'tracks_count': 18,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'playlist': {
+                        'mood': 'happy',
+                        'intensity': 8,
+                        'tracks': [
+                            {'name': 'Happy', 'artist': 'Pharrell Williams'},
+                            {'name': 'Good Life', 'artist': 'OneRepublic'},
+                            {'name': 'Walking on Sunshine', 'artist': 'Katrina & The Waves'}
+                        ]
+                    }
+                },
+                {
+                    'id': 'demo_playlist_3',
+                    'mood': 'energetic',
+                    'intensity': 9,
+                    'tracks_count': 20,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'playlist': {
+                        'mood': 'energetic',
+                        'intensity': 9,
+                        'tracks': [
+                            {'name': 'Eye of the Tiger', 'artist': 'Survivor'},
+                            {'name': 'We Will Rock You', 'artist': 'Queen'},
+                            {'name': 'Don\'t Stop Believin\'', 'artist': 'Journey'}
+                        ]
+                    }
+                }
+            ]
+            return jsonify({
+                'playlists': demo_playlists,
+                'pagination': {
+                    'page': 1,
+                    'limit': 10,
+                    'total': len(demo_playlists),
+                    'pages': 1
+                }
+            }), 200
+        
         # Get query parameters
         page = request.args.get('page', 1, type=int)
         limit = request.args.get('limit', 10, type=int)

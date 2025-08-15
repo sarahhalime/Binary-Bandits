@@ -105,6 +105,22 @@ def get_current_mood():
         user_id = get_jwt_identity()
         db = get_db()
         
+        # Demo mode - return a sample mood entry
+        if db is None:
+            demo_entry = {
+                'id': 'demo_mood_123',
+                'mood': 'calm',
+                'intensity': 6,
+                'notes': 'Feeling peaceful today',
+                'timestamp': datetime.utcnow().isoformat(),
+                'activities': ['meditation', 'walking'],
+                'weather': 'sunny',
+                'location': 'home'
+            }
+            return jsonify({
+                'current_mood': demo_entry
+            }), 200
+        
         # Get most recent mood entry
         entry = db.mood_entries.find_one(
             {'user_id': ObjectId(user_id)},

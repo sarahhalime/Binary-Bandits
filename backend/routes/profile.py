@@ -143,14 +143,59 @@ def get_user_stats():
         user_id = get_jwt_identity()
         db = get_db()
         
-        # Get query parameters
-        days = request.args.get('days', 30, type=int)
-        start_date = datetime.utcnow() - timedelta(days=days)
-        
         # Get user
         user = User.find_by_id(user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404
+        
+        # Demo mode - return sample statistics
+        if db is None:
+            demo_stats = {
+                'user': user.to_dict(),
+                'period_days': 30,
+                'mood_stats': {
+                    'total_entries': 15,
+                    'average_intensity': 6.2,
+                    'most_common_mood': 'calm',
+                    'mood_distribution': {
+                        'happy': 5,
+                        'calm': 6,
+                        'sad': 2,
+                        'anxious': 2
+                    }
+                },
+                'journal_stats': {
+                    'total_entries': 8,
+                    'total_words': 1200,
+                    'average_words_per_entry': 150,
+                    'most_active_day': 'Wednesday'
+                },
+                'activity_stats': {
+                    'total_activities': 12,
+                    'most_popular_activity': 'meditation',
+                    'average_activities_per_day': 0.4
+                },
+                'biometric_stats': {
+                    'heart_rate': {'average': 72, 'min': 65, 'max': 85},
+                    'sleep_hours': {'average': 7.5, 'min': 6, 'max': 9},
+                    'exercise_minutes': {'average': 30, 'min': 0, 'max': 60}
+                },
+                'music_stats': {
+                    'total_playlists': 5,
+                    'favorite_genre': 'ambient',
+                    'total_tracks': 85
+                },
+                'social_stats': {
+                    'total_friends': 3,
+                    'total_nudges_sent': 8,
+                    'total_nudges_received': 5
+                }
+            }
+            return jsonify(demo_stats), 200
+        
+        # Get query parameters
+        days = request.args.get('days', 30, type=int)
+        start_date = datetime.utcnow() - timedelta(days=days)
         
         # Get mood statistics
         mood_entries = list(db.mood_entries.find({
@@ -223,6 +268,19 @@ def get_user_insights():
     try:
         user_id = get_jwt_identity()
         db = get_db()
+        
+        # Demo mode - return sample insights
+        if db is None:
+            demo_insights = {
+                'mood_trend': 'Your mood has been consistently calm this week. Great job maintaining emotional balance!',
+                'activity_suggestion': 'Try adding some light exercise to your routine. Even 10 minutes of walking can boost your mood.',
+                'sleep_insight': 'Your sleep pattern shows good consistency. Keep up the 7-8 hours of rest!',
+                'wellness_tip': 'Consider practicing mindfulness meditation for 5 minutes daily to enhance your mental well-being.',
+                'social_encouragement': 'You\'ve been active with friends lately. Social connections are great for mental health!'
+            }
+            return jsonify({
+                'insights': demo_insights
+            }), 200
         
         # Get recent data
         recent_moods = list(db.mood_entries.find({

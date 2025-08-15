@@ -76,6 +76,51 @@ def get_friends_list():
         user_id = get_jwt_identity()
         db = get_db()
         
+        # Demo mode - return sample friends
+        if db is None:
+            demo_friends = [
+                {
+                    'id': 'demo_friend_1',
+                    'name': 'Sarah Johnson',
+                    'username': 'sarah_j',
+                    'profile_pic': None,
+                    'current_mood': {
+                        'mood': 'happy',
+                        'intensity': 7,
+                        'timestamp': datetime.utcnow().isoformat()
+                    },
+                    'last_seen': datetime.utcnow().isoformat()
+                },
+                {
+                    'id': 'demo_friend_2',
+                    'name': 'Mike Chen',
+                    'username': 'mike_c',
+                    'profile_pic': None,
+                    'current_mood': {
+                        'mood': 'calm',
+                        'intensity': 5,
+                        'timestamp': datetime.utcnow().isoformat()
+                    },
+                    'last_seen': datetime.utcnow().isoformat()
+                },
+                {
+                    'id': 'demo_friend_3',
+                    'name': 'Emma Davis',
+                    'username': 'emma_d',
+                    'profile_pic': None,
+                    'current_mood': {
+                        'mood': 'energetic',
+                        'intensity': 8,
+                        'timestamp': datetime.utcnow().isoformat()
+                    },
+                    'last_seen': datetime.utcnow().isoformat()
+                }
+            ]
+            return jsonify({
+                'friends': demo_friends,
+                'total_friends': len(demo_friends)
+            }), 200
+        
         # Get all friend connections
         connections = list(db.friend_connections.find({
             '$or': [
@@ -184,6 +229,51 @@ def get_received_nudges():
     try:
         user_id = get_jwt_identity()
         db = get_db()
+        
+        # Demo mode - return sample nudges
+        if db is None:
+            demo_nudges = [
+                {
+                    'id': 'demo_nudge_1',
+                    'message': 'Hey! How are you feeling today? 💙',
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'read': False,
+                    'sender': {
+                        'id': 'demo_friend_1',
+                        'name': 'Sarah Johnson',
+                        'username': 'sarah_j',
+                        'profile_pic': None
+                    }
+                },
+                {
+                    'id': 'demo_nudge_2',
+                    'message': 'Sending you positive vibes! ✨',
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'read': True,
+                    'sender': {
+                        'id': 'demo_friend_2',
+                        'name': 'Mike Chen',
+                        'username': 'mike_c',
+                        'profile_pic': None
+                    }
+                },
+                {
+                    'id': 'demo_nudge_3',
+                    'message': 'You\'ve got this! 🌟',
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'read': False,
+                    'sender': {
+                        'id': 'demo_friend_3',
+                        'name': 'Emma Davis',
+                        'username': 'emma_d',
+                        'profile_pic': None
+                    }
+                }
+            ]
+            return jsonify({
+                'nudges': demo_nudges,
+                'unread_count': len([n for n in demo_nudges if not n.get('read', False)])
+            }), 200
         
         # Get query parameters
         limit = request.args.get('limit', 20, type=int)

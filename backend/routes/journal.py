@@ -62,6 +62,50 @@ def get_journal_entries():
         user_id = get_jwt_identity()
         db = get_db()
         
+        # Demo mode - return sample journal entries
+        if db is None:
+            demo_entries = [
+                {
+                    'id': 'demo_entry_1',
+                    'title': 'A Peaceful Morning',
+                    'content': 'Today I woke up feeling refreshed and calm. The morning sunlight streaming through my window reminded me to appreciate the simple moments in life. I spent some time meditating and it really helped center my thoughts.',
+                    'mood': 'calm',
+                    'tags': ['morning', 'meditation', 'gratitude'],
+                    'word_count': 45,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'is_private': False
+                },
+                {
+                    'id': 'demo_entry_2',
+                    'title': 'Productive Day',
+                    'content': 'Had a really productive day at work today. Completed several important tasks and felt a sense of accomplishment. The team meeting went well and I\'m looking forward to the weekend.',
+                    'mood': 'happy',
+                    'tags': ['work', 'productivity', 'accomplishment'],
+                    'word_count': 38,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'is_private': False
+                },
+                {
+                    'id': 'demo_entry_3',
+                    'title': 'Feeling Grateful',
+                    'content': 'Reflecting on the past week, I realize how much I have to be grateful for. My family, friends, and the opportunities I\'ve been given. Sometimes it\'s important to pause and count our blessings.',
+                    'mood': 'grateful',
+                    'tags': ['gratitude', 'reflection', 'family'],
+                    'word_count': 42,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'is_private': False
+                }
+            ]
+            return jsonify({
+                'entries': demo_entries,
+                'pagination': {
+                    'page': 1,
+                    'limit': 10,
+                    'total': len(demo_entries),
+                    'pages': 1
+                }
+            }), 200
+        
         # Get query parameters
         page = request.args.get('page', 1, type=int)
         limit = request.args.get('limit', 10, type=int)

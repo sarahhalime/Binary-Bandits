@@ -4,6 +4,15 @@ import secrets
 import string
 from models.database import get_db
 
+# Demo account credentials for everyone to use
+DEMO_ACCOUNT = {
+    'username': 'demo_user',
+    'email': 'demo@mindfulharmony.com',
+    'password': 'demo123',
+    'name': 'Demo User',
+    'friend_code': 'DEMO1234'
+}
+
 class User:
     def __init__(self, username, email, password, name=None, profile_pic=None):
         self.username = username
@@ -56,10 +65,16 @@ class User:
         """Create a new user in the database"""
         db = get_db()
         
-        # Demo mode - create user without database
+        # Demo mode - always return the demo account
         if db is None:
-            user = User(username, email, password, name, profile_pic)
-            user._id = "demo_user_" + str(hash(email))  # Generate a demo ID
+            user = User(
+                DEMO_ACCOUNT['username'],
+                DEMO_ACCOUNT['email'],
+                DEMO_ACCOUNT['password'],
+                DEMO_ACCOUNT['name']
+            )
+            user._id = "demo_user_12345"  # Fixed demo ID
+            user.friend_code = DEMO_ACCOUNT['friend_code']
             return user, None
         
         # Check if user already exists
@@ -77,11 +92,16 @@ class User:
         """Find user by email"""
         db = get_db()
         
-        # Demo mode - create a demo user for testing
+        # Demo mode - always return the demo account
         if db is None:
-            # For demo purposes, create a user with any email
-            user = User("demo_user", email, "password123")
-            user._id = "demo_user_" + str(hash(email))
+            user = User(
+                DEMO_ACCOUNT['username'],
+                DEMO_ACCOUNT['email'],
+                DEMO_ACCOUNT['password'],
+                DEMO_ACCOUNT['name']
+            )
+            user._id = "demo_user_12345"  # Fixed demo ID
+            user.friend_code = DEMO_ACCOUNT['friend_code']
             return user
             
         user_data = db.users.find_one({"email": email})
@@ -107,14 +127,17 @@ class User:
         """Find user by ID"""
         db = get_db()
         
-        # Demo mode - create a demo user
+        # Demo mode - always return the demo account
         if db is None:
-            if user_id.startswith("demo_user_"):
-                # Create a demo user for demo mode
-                user = User("demo_user", "demo@example.com", "password")
-                user._id = user_id
-                return user
-            return None
+            user = User(
+                DEMO_ACCOUNT['username'],
+                DEMO_ACCOUNT['email'],
+                DEMO_ACCOUNT['password'],
+                DEMO_ACCOUNT['name']
+            )
+            user._id = "demo_user_12345"  # Fixed demo ID
+            user.friend_code = DEMO_ACCOUNT['friend_code']
+            return user
             
         from bson import ObjectId
         user_data = db.users.find_one({"_id": ObjectId(user_id)})
