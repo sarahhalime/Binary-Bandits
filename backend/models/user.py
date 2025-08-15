@@ -65,16 +65,16 @@ class User:
         """Create a new user in the database"""
         db = get_db()
         
-        # Demo mode - always return the demo account
+        # Demo mode - create user with provided details
         if db is None:
             user = User(
-                DEMO_ACCOUNT['username'],
-                DEMO_ACCOUNT['email'],
-                DEMO_ACCOUNT['password'],
-                DEMO_ACCOUNT['name']
+                username=username,
+                email=email,
+                password=password,
+                name=name or username
             )
-            user._id = "demo_user_12345"  # Fixed demo ID
-            user.friend_code = DEMO_ACCOUNT['friend_code']
+            user._id = "demo_user_" + str(hash(email))  # Generate unique ID based on email
+            user.friend_code = "DEMO" + str(hash(email))[-4:].upper()  # Generate unique friend code
             return user, None
         
         # Check if user already exists
@@ -92,16 +92,17 @@ class User:
         """Find user by email"""
         db = get_db()
         
-        # Demo mode - always return the demo account
+        # Demo mode - accept any email and create a user with that email
         if db is None:
+            # Create a user with the provided email and any password
             user = User(
-                DEMO_ACCOUNT['username'],
-                DEMO_ACCOUNT['email'],
-                DEMO_ACCOUNT['password'],
-                DEMO_ACCOUNT['name']
+                username=email.split('@')[0],  # Use email prefix as username
+                email=email,
+                password="demo123",  # Any password works in demo mode
+                name=email.split('@')[0].title()  # Capitalize username as name
             )
-            user._id = "demo_user_12345"  # Fixed demo ID
-            user.friend_code = DEMO_ACCOUNT['friend_code']
+            user._id = "demo_user_" + str(hash(email))  # Generate unique ID based on email
+            user.friend_code = "DEMO" + str(hash(email))[-4:].upper()  # Generate unique friend code
             return user
             
         user_data = db.users.find_one({"email": email})
@@ -127,17 +128,20 @@ class User:
         """Find user by ID"""
         db = get_db()
         
-        # Demo mode - always return the demo account
+        # Demo mode - create a generic demo user
         if db is None:
-            user = User(
-                DEMO_ACCOUNT['username'],
-                DEMO_ACCOUNT['email'],
-                DEMO_ACCOUNT['password'],
-                DEMO_ACCOUNT['name']
-            )
-            user._id = "demo_user_12345"  # Fixed demo ID
-            user.friend_code = DEMO_ACCOUNT['friend_code']
-            return user
+            if user_id.startswith("demo_user_"):
+                # Extract email hash from user_id and create a generic user
+                user = User(
+                    username="demo_user",
+                    email="demo@mindfulharmony.com",
+                    password="demo123",
+                    name="Demo User"
+                )
+                user._id = user_id
+                user.friend_code = "DEMO1234"
+                return user
+            return None
             
         from bson import ObjectId
         user_data = db.users.find_one({"_id": ObjectId(user_id)})

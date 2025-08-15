@@ -64,9 +64,16 @@ def login():
         if not user:
             return jsonify({'error': 'Invalid email or password'}), 401
         
-        # Verify password
-        if not user.verify_password(data['password']):
-            return jsonify({'error': 'Invalid email or password'}), 401
+        # In demo mode, accept any password
+        from models.database import get_db
+        db = get_db()
+        if db is None:
+            # Demo mode - accept any password
+            pass
+        else:
+            # Verify password only in production mode
+            if not user.verify_password(data['password']):
+                return jsonify({'error': 'Invalid email or password'}), 401
         
         # Update last login
         user.update_last_login()

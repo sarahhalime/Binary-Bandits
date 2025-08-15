@@ -9,7 +9,13 @@ def init_db(app):
     """Initialize database connection"""
     global db
     try:
-        client = MongoClient(app.config['MONGODB_URI'])
+        # Add timeout to prevent hanging
+        client = MongoClient(
+            app.config['MONGODB_URI'],
+            serverSelectionTimeoutMS=5000,  # 5 second timeout
+            connectTimeoutMS=5000,
+            socketTimeoutMS=5000
+        )
         # Test the connection
         client.admin.command('ping')
         db = client.mindful_harmony
@@ -18,7 +24,7 @@ def init_db(app):
         # Create indexes for better performance
         create_indexes()
         
-    except ConnectionFailure as e:
+    except Exception as e:
         print(f"❌ Failed to connect to MongoDB: {e}")
         print("⚠️  Running in demo mode without database. Some features will be limited.")
         db = None
