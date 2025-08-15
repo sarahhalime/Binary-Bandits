@@ -28,7 +28,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 app.config['MONGODB_URI'] = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/mindful_harmony')
 
 # Initialize extensions
-CORS(app, origins=['http://localhost:3000'], supports_credentials=True)
+CORS(app, origins=['http://localhost:3000', 'http://localhost:3001'], supports_credentials=True)
 jwt = JWTManager(app)
 
 # Initialize database
@@ -61,4 +61,4 @@ def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)
