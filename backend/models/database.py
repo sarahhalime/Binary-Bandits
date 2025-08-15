@@ -20,10 +20,15 @@ def init_db(app):
         
     except ConnectionFailure as e:
         print(f"❌ Failed to connect to MongoDB: {e}")
-        raise e
+        print("⚠️  Running in demo mode without database. Some features will be limited.")
+        db = None
 
 def create_indexes():
     """Create database indexes for better performance"""
+    if db is None:
+        print("⚠️  Skipping index creation - database not available")
+        return
+        
     # Users collection indexes
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True)

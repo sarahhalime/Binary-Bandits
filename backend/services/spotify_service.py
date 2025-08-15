@@ -9,16 +9,19 @@ class SpotifyService:
         self.client_id = os.getenv('SPOTIFY_CLIENT_ID')
         self.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
         
-        if not self.client_id or not self.client_secret:
-            raise ValueError("Spotify credentials not found in environment variables")
-        
-        # Initialize Spotify client
-        self.sp = spotipy.Spotify(
-            client_credentials_manager=SpotifyClientCredentials(
-                client_id=self.client_id,
-                client_secret=self.client_secret
+        # Initialize Spotify client if credentials are available
+        if self.client_id and self.client_secret:
+            self.sp = spotipy.Spotify(
+                client_credentials_manager=SpotifyClientCredentials(
+                    client_id=self.client_id,
+                    client_secret=self.client_secret
+                )
             )
-        )
+            self.spotify_available = True
+        else:
+            print("Warning: Spotify credentials not found. Music features will be limited.")
+            self.sp = None
+            self.spotify_available = False
         
         # Mood to genre/audio feature mappings
         self.mood_mappings = {
@@ -82,6 +85,9 @@ class SpotifyService:
     
     def generate_mood_playlist(self, mood, intensity=5, limit=20):
         """Generate a playlist based on mood and intensity"""
+        if not self.spotify_available:
+            return self._get_fallback_playlist(mood, intensity, limit)
+            
         try:
             # Get mood mapping
             mood_config = self.mood_mappings.get(mood.lower(), self.mood_mappings['calm'])
@@ -155,14 +161,20 @@ class SpotifyService:
     
     def get_available_genres(self):
         """Get available genres"""
+        if not self.spotify_available:
+            return ['pop', 'rock', 'electronic', 'jazz', 'classical', 'ambient', 'chill']
+            
         try:
             genres = self.sp.recommendation_genres()
             return genres['genres']
         except Exception as e:
-            return []
+            return ['pop', 'rock', 'electronic', 'jazz', 'classical', 'ambient', 'chill']
     
     def get_recommendations(self, seed_tracks=None, seed_genres=None, limit=20):
         """Get track recommendations"""
+        if not self.spotify_available:
+            return []
+            
         try:
             recommendations = self.sp.recommendations(
                 seed_tracks=seed_tracks[:5] if seed_tracks else None,
@@ -213,6 +225,9 @@ class SpotifyService:
     
     def _get_seed_genres(self, target_genres):
         """Get available seed genres that match target genres"""
+        if not self.spotify_available:
+            return ['pop', 'rock', 'electronic', 'jazz', 'classical']
+            
         try:
             available_genres = self.sp.recommendation_genres()['genres']
             
@@ -232,7 +247,7 @@ class SpotifyService:
         except Exception as e:
             return ['pop', 'rock', 'electronic', 'jazz', 'classical']
     
-    def _get_fallback_playlist(self, mood, limit):
+    def _get_fallback_playlist(self, mood, intensity=5, limit=20):
         """Get fallback playlist when API fails"""
         # Predefined tracks for different moods
         fallback_tracks = {

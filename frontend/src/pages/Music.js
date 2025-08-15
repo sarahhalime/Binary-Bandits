@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { musicAPI } from '../services/api';
 import { 
-  Music, 
+  Music as MusicIcon, 
   Play, 
   Heart, 
   Search, 
@@ -98,7 +98,7 @@ const Music = () => {
         className="text-center mb-8"
       >
         <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center justify-center">
-          <Music className="mr-3 text-primary-600" size={40} />
+          <MusicIcon className="mr-3 text-primary-600" size={40} />
           Mood-to-Music
         </h1>
         <p className="text-lg text-gray-600">
@@ -284,7 +284,7 @@ const Music = () => {
           className="card"
         >
           <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-            <Music className="mr-2 text-primary-600" size={24} />
+            <MusicIcon className="mr-2 text-primary-600" size={24} />
             Recent Playlists
           </h2>
 
