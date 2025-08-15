@@ -56,6 +56,12 @@ class User:
         """Create a new user in the database"""
         db = get_db()
         
+        # Demo mode - create user without database
+        if db is None:
+            user = User(username, email, password, name, profile_pic)
+            user._id = "demo_user_" + str(hash(email))  # Generate a demo ID
+            return user, None
+        
         # Check if user already exists
         if db.users.find_one({"$or": [{"email": email}, {"username": username}]}):
             return None, "User already exists"
@@ -70,6 +76,14 @@ class User:
     def find_by_email(email):
         """Find user by email"""
         db = get_db()
+        
+        # Demo mode - create a demo user for testing
+        if db is None:
+            # For demo purposes, create a user with any email
+            user = User("demo_user", email, "password123")
+            user._id = "demo_user_" + str(hash(email))
+            return user
+            
         user_data = db.users.find_one({"email": email})
         if user_data:
             user = User.__new__(User)
@@ -91,8 +105,18 @@ class User:
     @staticmethod
     def find_by_id(user_id):
         """Find user by ID"""
-        from bson import ObjectId
         db = get_db()
+        
+        # Demo mode - create a demo user
+        if db is None:
+            if user_id.startswith("demo_user_"):
+                # Create a demo user for demo mode
+                user = User("demo_user", "demo@example.com", "password")
+                user._id = user_id
+                return user
+            return None
+            
+        from bson import ObjectId
         user_data = db.users.find_one({"_id": ObjectId(user_id)})
         if user_data:
             user = User.__new__(User)
@@ -115,6 +139,11 @@ class User:
         """Update last login timestamp"""
         db = get_db()
         self.last_login = datetime.utcnow()
+        
+        # Demo mode - just update the instance
+        if db is None:
+            return
+            
         db.users.update_one(
             {"_id": self._id},
             {"$set": {"last_login": self.last_login}}
