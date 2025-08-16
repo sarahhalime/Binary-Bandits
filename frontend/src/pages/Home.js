@@ -119,6 +119,27 @@ const Home = () => {
     }
   ];
 
+  const starRef = React.useRef(null);
+  const [showDust, setShowDust] = React.useState(false);
+  const [showStar, setShowStar] = React.useState(true);
+
+  React.useEffect(() => {
+    // Hide the shooting star after animation duration (e.g., 5.2s)
+    const timer = setTimeout(() => setShowStar(false), 5200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  React.useEffect(() => {
+    if (starRef.current) {
+      starRef.current.style.animation = 'none';
+      void starRef.current.offsetWidth;
+      starRef.current.style.animation = '';
+      setTimeout(() => setShowDust(true), 2200); // Show dust near end of animation
+      setTimeout(() => setShowDust(false), 2600); // Hide dust after animation
+      setTimeout(() => setShowStar(false), 2600); // Hide star after animation
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -128,20 +149,225 @@ const Home = () => {
   }
 
   return (
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 relative overflow-hidden" style={{ background: 'radial-gradient(ellipse at top left, #5a2ea6 0%, #8e44ad 40%, #d76d77 70%, #ffaf7b 100%)' }}>
 
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8">
-      {/* Welcome Section */}
+      
+      {/* Galaxy nebula glows (lighter and smoother) */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div style={{
+          position: 'absolute',
+          top: '10%',
+          left: '15%',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(186,85,211,0.35) 0%, rgba(186,85,211,0) 70%)',
+          filter: 'blur(48px)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '10%',
+          right: '10%',
+          width: '350px',
+          height: '350px',
+          background: 'radial-gradient(circle, rgba(135,206,250,0.28) 0%, rgba(135,206,250,0) 70%)',
+          filter: 'blur(40px)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: '60%',
+          left: '60%',
+          width: '250px',
+          height: '250px',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%)',
+          filter: 'blur(32px)',
+        }} />
+        {/* Animated stars */}
+        {[...Array(80)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 2 + 1}px`,
+              height: `${Math.random() * 2 + 1}px`,
+              borderRadius: '50%',
+              background: 'white',
+              opacity: Math.random() * 0.6 + 0.2,
+              filter: 'blur(0.7px)',
+              zIndex: 0,
+              animation: `twinkle ${Math.random() * 2 + 1}s infinite alternate`,
+            }}
+          />
+        ))}
+      </div>
+      {/* Galaxy nebula glows */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div style={{
+          position: 'absolute',
+          top: '10%',
+          left: '15%',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(186,85,211,0.5) 0%, rgba(186,85,211,0) 70%)',
+          filter: 'blur(40px)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '10%',
+          right: '10%',
+          width: '350px',
+          height: '350px',
+          background: 'radial-gradient(circle, rgba(135,206,250,0.4) 0%, rgba(135,206,250,0) 70%)',
+          filter: 'blur(32px)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: '60%',
+          left: '60%',
+          width: '250px',
+          height: '250px',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%)',
+          filter: 'blur(24px)',
+        }} />
+        {/* Animated stars */}
+        {[...Array(80)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 2 + 1}px`,
+              height: `${Math.random() * 2 + 1}px`,
+              borderRadius: '50%',
+              background: 'white',
+              opacity: Math.random() * 0.7 + 0.2,
+              filter: 'blur(0.5px)',
+              zIndex: 0,
+              animation: `twinkle ${Math.random() * 2 + 1}s infinite alternate`,
+            }}
+          />
+        ))}
+      </div>
+      <style>{`
+        @keyframes twinkle {
+          from { opacity: 0.3; }
+          to { opacity: 1; }
+        }
+      `}</style>
+      {/* Shooting Star Animation Above Welcome */}
+      {/* Shooting star flies fully across, tail visible and fading, sprinkle dust at far right edge */}
+      {/** Only render the SVG while the animation is running */}
+      {showStar && (
+        <div style={{ position: 'absolute', left: 0, top: '90px', width: '100vw', height: '80px', pointerEvents: 'none', zIndex: 30 }}>
+          <svg style={{ width: '100vw', height: '80px', overflow: 'visible', position: 'absolute', left: 0, top: 0 }}>
+            <g id="shootingStarGroup">
+              {/* Tail - visible, trailing, fading out (shorter tail) */}
+              <path id="tail" d="M 0 60 Q 400 20, 1200 40" stroke="url(#tailGradient)" strokeWidth="12" fill="none" opacity="0.7" filter="url(#tailBlur)" />
+              {/* Star Head - glowing circle with starburst */}
+              <g id="starHead">
+                <circle cx="1200" cy="40" r="24" fill="url(#starGlow)" filter="url(#glow)" />
+                {/* Starburst */}
+                <g>
+                  <line x1="1200" y1="22" x2="1200" y2="58" stroke="#fff8b0" strokeWidth="3" opacity="0.7" />
+                  <line x1="1182" y1="40" x2="1218" y2="40" stroke="#fff8b0" strokeWidth="3" opacity="0.7" />
+                  <line x1="1190" y1="28" x2="1210" y2="52" stroke="#fff8b0" strokeWidth="2" opacity="0.5" />
+                  <line x1="1210" y1="28" x2="1190" y2="52" stroke="#fff8b0" strokeWidth="2" opacity="0.5" />
+                </g>
+                {/* Sparkle */}
+                <circle cx="1200" cy="40" r="5" fill="#fff" opacity="0.9" />
+              </g>
+            </g>
+            <defs>
+              <linearGradient id="tailGradient" x1="0" y1="60" x2="1200" y2="40" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#fff8b0" />
+                <stop offset="0.3" stopColor="#FFD700" />
+                <stop offset="0.7" stopColor="#FFA500" />
+                <stop offset="1" stopColor="rgba(255,255,255,0)" />
+              </linearGradient>
+              <radialGradient id="starGlow" cx="1200" cy="40" r="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#fff8b0" stopOpacity="1" />
+                <stop offset="60%" stopColor="#FFD700" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="#FFA500" stopOpacity="0" />
+              </radialGradient>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="tailBlur" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="7" />
+              </filter>
+            </defs>
+          </svg>
+          <style>{`
+            @keyframes moveStarGroup {
+              0% {
+                transform: translateX(-1200px) scale(1) rotate(-8deg);
+                opacity: 0;
+              }
+              10% {
+                opacity: 1;
+              }
+              80% {
+                transform: translateX(0px) scale(1) rotate(0deg);
+                opacity: 1;
+              }
+              100% {
+                transform: translateX(0px) scale(1) rotate(0deg);
+                opacity: 0;
+              }
+            }
+            #shootingStarGroup {
+              transform-box: fill-box;
+              transform-origin: 0px 60px;
+              animation: moveStarGroup 5.2s cubic-bezier(0.4,0,0.2,1) 1;
+            }
+          `}</style>
+        </div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
-          Welcome back, {user?.name}! 👋
+        <h1 className="text-4xl font-bold mb-2" style={{ color: '#111', position: 'relative', zIndex: 20 }}>
+          Welcome back, {user?.name}! <span role="img" aria-label="wave">👋</span>
         </h1>
         <p className="text-lg text-gray-600">
         </p>
       </motion.div>
+      <style>{`
+        .flying-star {
+          animation: flyStar 5.2s cubic-bezier(0.4,0,0.2,1) 1;
+        }
+        @keyframes flyStar {
+          0% {
+            opacity: 0;
+            transform: translate(0, 0) scale(0.7);
+          }
+          10% {
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+          }
+          80% {
+            opacity: 1;
+            transform: translate(calc(100vw - 60px), calc(-70vh - 80px)) scale(1.2);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(calc(100vw + 0px), calc(-80vh - 120px)) scale(0.8);
+          }
+        }
+        @keyframes fallDust {
+          0% { opacity: 0; transform: translateY(0); }
+          10% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(30px); }
+        }
+      `}</style>
 
       {/* Quick Actions Centered */}
       <motion.div
