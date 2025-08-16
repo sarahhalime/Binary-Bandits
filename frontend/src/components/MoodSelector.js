@@ -1,52 +1,170 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 const moods = [
-  { emoji: '😊', label: 'Happy' },
-  { emoji: '😢', label: 'Sad' },
-  { emoji: '😰', label: 'Anxious' },
-  { emoji: '😌', label: 'Calm' },
-  { emoji: '⚡', label: 'Energetic' },
-  { emoji: '💕', label: 'Romantic' },
+  { name: 'Happy', emoji: '😊' },
+  { name: 'Sad', emoji: '😢' },
+  { name: 'Anxious', emoji: '😰' },
+  { name: 'Calm', emoji: '😌' },
+  { name: 'Energetic', emoji: '⚡' },
+  { name: 'Romantic', emoji: '💕' },
 ];
 
-export default function MoodSelector({ onSelect }) {
+export default function MoodPage() {
+  const [currentMood, setCurrentMood] = useState({ name: 'Happy', intensity: 5 });
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [intensity, setIntensity] = useState(5);
+  const navigate = useNavigate();
+
+  const handleSelect = () => {
+    setCurrentMood({ name: moods[carouselIndex].name, intensity });
+    toast.success('Mood recorded successfully!');
+  navigate('/');
+  };
+
+  const goLeft = () => setCarouselIndex(i => (i === 0 ? moods.length - 1 : i - 1));
+  const goRight = () => setCarouselIndex(i => (i === moods.length - 1 ? 0 : i + 1));
+
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{
-  background: '#f3e8ff'
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #e3a7e7 0%, #f7b2b7 100%)',
+      padding: '2rem',
+      fontFamily: 'Inter, sans-serif'
     }}>
-      <div className="w-full max-w-6xl mx-auto p-16 rounded-3xl shadow-2xl animate-gradient-move" style={{
-        background: 'linear-gradient(135deg, #cb7de1ff 0%, #e3e0ff 50%, #cfa5e5ff 100%)',
-        boxShadow: '0 8px 32px 0 rgba(255, 255, 255, 0.12), 0 1.5px 6px 0 rgba(255, 255, 255, 0.08)',
-        backgroundSize: '200% 200%',
-        animation: 'gradientMove 6s ease-in-out infinite',
+      <Toaster position="bottom-right" />
+      {/* Current Mood Card */}
+      <div style={{
+        background: 'rgba(255,255,255,0.8)',
+        borderRadius: '2rem',
+        padding: '1.5rem 2rem',
+        maxWidth: 400,
+        margin: '0 auto 2rem auto',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem'
       }}>
-        <h2 className="text-4xl font-extrabold text-center mb-10 text-gray-900" style={{letterSpacing: '-1px'}}>How are you feeling right now?</h2>
-  <div className="flex justify-center gap-6 w-full">
-          {moods.map((mood) => (
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '1.25rem', marginBottom: 4 }}>Current Mood</div>
+          <div style={{ color: '#555', fontSize: '1rem' }}>
+            You're feeling {currentMood.name.toLowerCase()} (Intensity: {currentMood.intensity}/10)
+          </div>
+        </div>
+        <span style={{ fontSize: '2rem', marginLeft: 'auto' }}>
+          {moods.find(m => m.name === currentMood.name)?.emoji}
+        </span>
+      </div>
+      {/* Carousel */}
+      <div style={{
+        background: 'rgba(255,255,255,0.7)',
+        borderRadius: '2rem',
+        padding: '2rem',
+        maxWidth: 700,
+        margin: '0 auto',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ fontWeight: 800, fontSize: '2.5rem', marginBottom: '2rem' }}>How are you feeling right now?</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem' }}>
+          <button
+            onClick={goLeft}
+            style={{
+              background: '#fff',
+              border: 'none',
+              borderRadius: '50%',
+              width: 48,
+              height: 48,
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.07)'
+            }}
+            aria-label="Previous"
+          >←</button>
+          <div style={{
+            background: '#fff',
+            borderRadius: '1.5rem',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+            padding: '2rem 2.5rem',
+            minWidth: 180,
+            minHeight: 220,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <span style={{ fontSize: '4rem', marginBottom: '1rem' }}>
+              {moods[carouselIndex].emoji}
+            </span>
+            <span style={{ fontWeight: 700, fontSize: '1.5rem', marginBottom: '1rem' }}>
+              {moods[carouselIndex].name}
+            </span>
+            {/* Intensity Selector */}
+            <div style={{ margin: '1rem 0', width: '100%' }}>
+              <label htmlFor="intensity" style={{ fontWeight: 500, fontSize: '1rem', marginBottom: 8, display: 'block' }}>Intensity:</label>
+              <input
+                id="intensity"
+                type="range"
+                min={1}
+                max={10}
+                value={intensity}
+                onChange={e => setIntensity(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+              <div style={{ textAlign: 'center', marginTop: 4, fontWeight: 600 }}>{intensity}/10</div>
+            </div>
             <button
-              key={mood.label}
-              className="flex flex-col items-center rounded-2xl px-12 py-10 transition hover:scale-105 focus:outline-none"
+              onClick={handleSelect}
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, #ffffffff 100%)',
-                boxShadow: '0 4px 16px 0 rgba(255, 255, 255, 0.1)',
-                border: '2px solid #d9a2dfff',
-                minWidth: '150px',
-                minHeight: '180px',
-                maxWidth: '170px',
-                maxHeight: '200px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0',
+                background: 'linear-gradient(90deg, #a78bfa 0%, #f472b6 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '0.75rem',
+                padding: '0.75rem 2rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                cursor: 'pointer',
+                marginTop: '1rem'
               }}
-              onClick={() => onSelect(mood.label)}
             >
-              <span className="mb-2" style={{fontSize: '4.2rem', lineHeight: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '4.2rem'}}>{mood.emoji}</span>
-              <span className="text-2xl font-semibold text-gray-800" style={{letterSpacing: '-1px'}}>{mood.label}</span>
+              Select
             </button>
+          </div>
+          <button
+            onClick={goRight}
+            style={{
+              background: '#fff',
+              border: 'none',
+              borderRadius: '50%',
+              width: 48,
+              height: 48,
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.07)'
+            }}
+            aria-label="Next"
+          >→</button>
+        </div>
+        {/* Dots */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: 8 }}>
+          {moods.map((_, i) => (
+            <span
+              key={i}
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                background: i === carouselIndex ? '#a78bfa' : '#e0e0e0',
+                display: 'inline-block'
+              }}
+            />
           ))}
         </div>
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
