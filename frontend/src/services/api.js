@@ -52,6 +52,12 @@ export const authAPI = {
   
   getFriendCode: () => 
     api.get('/auth/friend-code').then(res => res.data.friend_code),
+  
+  completeOnboarding: (profileData) => 
+    api.post('/auth/onboarding', profileData).then(res => res.data),
+  
+  updateProfilePhoto: (photoData) => 
+    api.post('/auth/profile/photo', { profilePhoto: photoData }).then(res => res.data),
 };
 
 // Mood API
@@ -133,6 +139,39 @@ export const socialAPI = {
   
   removeFriend: (friendId) => 
     api.delete(`/social/friend/${friendId}/remove`).then(res => res.data),
+  
+  // Vent Wall API
+  createVentPost: (postData) => 
+    api.post('/social/vent', postData).then(res => res.data),
+  
+  getVentPosts: (params = {}) => 
+    api.get('/social/vent', { params }).then(res => res.data),
+  
+  reactToVentPost: (postId, reaction) => 
+    api.post(`/social/vent/${postId}/react`, { reaction }).then(res => res.data),
+  
+  removeVentReaction: (postId) => 
+    api.delete(`/social/vent/${postId}/react`).then(res => res.data),
+  
+  deleteVentPost: (postId) => 
+    api.delete(`/social/vent/${postId}`).then(res => res.data),
+  
+  getVentStats: () => 
+    api.get('/social/vent/stats').then(res => res.data),
+  
+  // Comment API
+  createComment: (postId, content) => 
+    api.post(`/social/vent/${postId}/comments`, { content }).then(res => res.data),
+  
+  getComments: (postId, params = {}) => 
+    api.get(`/social/vent/${postId}/comments`, { params }).then(res => res.data),
+  
+  deleteComment: (commentId) => 
+    api.delete(`/social/vent/comments/${commentId}`).then(res => res.data),
+  
+  // Mood Heatmap API
+  getMoodHeatmap: () => 
+    api.get('/social/mood-heatmap').then(res => res.data),
 };
 
 // Music API

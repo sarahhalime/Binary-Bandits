@@ -1,8 +1,20 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.database import get_db
-from services.ai_service import get_ai_response
 from datetime import datetime, timedelta
+
+# Temporarily disable AI service for deployment
+try:
+    from services.ai_service import get_ai_response
+except ImportError:
+    print("⚠️  AI service not available")
+    def get_ai_response(content, mood='', user_id=None):
+        return {
+            'response': "Thank you for sharing your thoughts. AI features are currently unavailable, but your feelings are valid and important.",
+            'is_crisis': False,
+            'ai_available': False,
+            'timestamp': datetime.utcnow().isoformat()
+        }
 from bson import ObjectId
 
 journal_bp = Blueprint('journal', __name__)

@@ -62,3 +62,19 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# Cache and build files
+
+node_modules/.cache/
+
+**/.cache/
+
+.eslintcache
+
+*.pack
+
+*.pack.old
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

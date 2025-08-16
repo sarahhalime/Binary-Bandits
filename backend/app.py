@@ -22,13 +22,28 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configuration
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'your-secret-key')
+# Production Configuration
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'fallback-secret-key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
-app.config['MONGODB_URI'] = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/mindful_harmony')
+app.config['MONGODB_URI'] = os.getenv('MONGODB_URI')
+
+# Environment-based CORS configuration
+FRONTEND_URLS = [
+    'http://localhost:3000',  # Local development
+    'http://localhost:3001',  # Alternative local
+    os.getenv('FRONTEND_URL', ''),  # Production frontend URL
+]
+
+# Filter out empty URLs
+FRONTEND_URLS = [url for url in FRONTEND_URLS if url]
 
 # Initialize extensions
-CORS(app, origins=['http://localhost:3000', 'http://localhost:3001'], supports_credentials=True)
+CORS(app, 
+     origins=FRONTEND_URLS, 
+     supports_credentials=True,
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
+     resources={r"/api/*": {"origins": FRONTEND_URLS}})
 jwt = JWTManager(app)
 
 # Initialize database
@@ -61,4 +76,6 @@ def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    port = int(os.getenv('PORT', 5001))
+    debug_mode = os.getenv('FLASK_ENV', 'production') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)

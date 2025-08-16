@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import { useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -10,7 +11,12 @@ import Music from './pages/Music';
 import Journal from './pages/Journal';
 import Activities from './pages/Activities';
 import Social from './pages/Social';
+import MoodMap from './pages/MoodMap';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+import OnboardingFlow from './components/OnboardingFlow';
+import Dashboard from './pages/Dashboard';
+import MoodGate from './pages/MoodGate';
 import './index.css';
 
 // Protected Route Component
@@ -19,7 +25,7 @@ const ProtectedRoute = ({ children }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="spinner"></div>
       </div>
     );
@@ -34,7 +40,7 @@ const PublicRoute = ({ children }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="spinner"></div>
       </div>
     );
@@ -44,12 +50,34 @@ const PublicRoute = ({ children }) => {
 };
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const pathname = window.location.pathname;
+  // Show Navbar if user is logged in, except while on /mood-gate
+  const showNavbar = user && pathname !== '/mood-gate';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-calm-50 to-primary-50">
-      {user && <Navbar />}
-      <main className={user ? 'pt-16' : ''}>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-pattern opacity-20" />
+        <div className="absolute top-0 left-0 w-full h-full bg-mesh opacity-10" />
+      </div>
+      {showNavbar && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 50 }}>
+          <Navbar>
+            <div style={{ position: 'absolute', top: 0, right: 0, padding: '1rem' }}>
+              {/* Sign in/out button logic */}
+              {user ? (
+                <button onClick={signOut} className="bg-white rounded-full px-4 py-2 shadow-md font-semibold text-purple-600 hover:bg-purple-50 transition">Sign Out</button>
+              ) : (
+                <button onClick={() => navigate('/login')} className="bg-white rounded-full px-4 py-2 shadow-md font-semibold text-purple-600 hover:bg-purple-50 transition">Sign In</button>
+              )}
+            </div>
+          </Navbar>
+        </div>
+      )}
+      <main className={showNavbar ? 'pt-16' : ''}>
         <Routes>
           <Route path="/" element={
             <ProtectedRoute>
@@ -65,6 +93,11 @@ function AppContent() {
             <PublicRoute>
               <Register />
             </PublicRoute>
+          } />
+          <Route path="/mood-gate" element={
+            <ProtectedRoute>
+              <MoodGate />
+            </ProtectedRoute>
           } />
           <Route path="/music" element={
             <ProtectedRoute>
@@ -86,16 +119,35 @@ function AppContent() {
               <Social />
             </ProtectedRoute>
           } />
+          <Route path="/mood-map" element={
+            <ProtectedRoute>
+              <MoodMap />
+            </ProtectedRoute>
+          } />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
           } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
+          <Route path="/onboarding" element={
+            <ProtectedRoute>
+              <OnboardingFlow />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </main>
-      
-      <Toaster
-        position="top-right"
+       <Toaster
+         position="bottom-right"
         toastOptions={{
           duration: 4000,
           style: {
@@ -107,7 +159,7 @@ function AppContent() {
           },
           success: {
             iconTheme: {
-              primary: '#14b8a6',
+              primary: '#6366f1',
               secondary: '#ffffff',
             },
           },
