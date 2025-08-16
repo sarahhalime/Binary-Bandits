@@ -6,6 +6,8 @@ import { Eye, EyeOff, Heart, User, Mail, Lock } from 'lucide-react';
 import AnimatedBackground from '../components/AnimatedBackground.tsx';
 
 const Register = () => {
+  // Track keystrokes for bubble animation
+  const [inputKey, setInputKey] = useState(0);
   const navigate = useNavigate();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
@@ -26,6 +28,7 @@ const Register = () => {
       ...prev,
       [name]: value
     }));
+  setInputKey(prev => prev + 1); // Increment key for animation
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -139,7 +142,13 @@ const Register = () => {
               scale: 1.08,
               rotate: bubble.rotate,
             }}
-            transition={{ repeat: Infinity, repeatType: 'reverse', duration: bubble.duration, delay: bubble.delay, ease: 'easeInOut' }}
+            transition={{
+              repeat: Infinity,
+              repeatType: 'reverse',
+              duration: bubble.duration,
+              delay: bubble.delay,
+              ease: 'easeInOut',
+            }}
             style={{
               position: 'absolute',
               left: bubble.left,
