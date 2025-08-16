@@ -136,19 +136,11 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="relative z-10">
         {/* Welcome Header */}
-// ...existing code...
         <WelcomeHeader />
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-6 pb-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-// ...existing code...
-            <WelcomeHeader />
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-6 pb-12">
-              {/* Mood selector and current mood card only on Home.js */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-// ...existing code...
             {/* Left Column - Features */}
             <div className="lg:col-span-2">
               <motion.div

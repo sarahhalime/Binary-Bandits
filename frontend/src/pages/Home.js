@@ -37,8 +37,8 @@ const Home = () => {
     { name: 'anxious', icon: Zap, color: 'yellow', emoji: '😰' },
     { name: 'calm', icon: Heart, color: 'calm', emoji: '😌' },
     { name: 'energetic', icon: Coffee, color: 'orange', emoji: '⚡' },
-    { name: 'angry', icon: HeartIcon, color: 'pink', emoji: '😠' },
-  }, []);
+    { name: 'romantic', icon: HeartIcon, color: 'pink', emoji: '💕' },
+  ];
 
   const loadDashboardData = async () => {
     try {
@@ -143,6 +143,10 @@ const Home = () => {
   const [showDust, setShowDust] = React.useState(false);
   const [showStar, setShowStar] = React.useState(true);
 
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
   React.useEffect(() => {
     // Hide the shooting star after animation duration (e.g., 5.2s)
     const timer = setTimeout(() => setShowStar(false), 5200);
@@ -169,10 +173,6 @@ const Home = () => {
   }
 
   return (
-// ...existing code...
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Welcome Section */}
-// ...existing code...
     <div className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 relative overflow-hidden" style={{ background: 'radial-gradient(ellipse at top left, #5a2ea6 0%, #8e44ad 40%, #d76d77 70%, #ffaf7b 100%)' }}>
 
       
@@ -398,7 +398,7 @@ const Home = () => {
           `}</style>
         </div>
       )}
-// ...existing code...
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

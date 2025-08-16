@@ -660,6 +660,40 @@
   font-weight: 600 !important;
 }
 
-.leaflet-control-zoom a:hover {
-  background: rgba(255, 255, 255, 1) !important;
-}
+   .leaflet-control-zoom a:hover {
+     background: rgba(255, 255, 255, 1) !important;
+   }
+
+   /* Range Slider Styling for Mood Selector */
+   .slider::-webkit-slider-thumb {
+     appearance: none;
+     height: 20px;
+     width: 20px;
+     border-radius: 50%;
+     background: linear-gradient(135deg, #8b5cf6, #ec4899);
+     cursor: pointer;
+     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+   }
+
+   .slider::-moz-range-thumb {
+     height: 20px;
+     width: 20px;
+     border-radius: 50%;
+     background: linear-gradient(135deg, #8b5cf6, #ec4899);
+     cursor: pointer;
+     border: none;
+     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+   }
+
+   .slider::-webkit-slider-track {
+     height: 6px;
+     border-radius: 3px;
+     background: linear-gradient(90deg, #e5e7eb, #d1d5db);
+   }
+
+   .slider::-moz-range-track {
+     height: 6px;
+     border-radius: 3px;
+     background: linear-gradient(90deg, #e5e7eb, #d1d5db);
+     border: none;
+   }
