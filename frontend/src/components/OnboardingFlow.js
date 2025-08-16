@@ -75,9 +75,16 @@ const OnboardingFlow = () => {
   const toggleArrayValue = (field, value) => {
     setProfileData(prev => ({
       ...prev,
-      [field]: prev[field].includes(value) 
+      [field]: prev[field].includes(value)
         ? prev[field].filter(item => item !== value)
         : [...prev[field], value]
+    }));
+  };
+
+  const toggleSingleValue = (field, value) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: prev[field] === value ? '' : value
     }));
   };
 
@@ -93,7 +100,39 @@ const OnboardingFlow = () => {
     updateProfileData('profilePhoto', photoData);
   };
 
+  // Validation for Mental Health Profile step
+  const validateMentalHealthStep = () => {
+    const errors = [];
+    
+    // Check if at least one primary concern is selected
+    if (profileData.primaryConcerns.length === 0) {
+      errors.push('Please select at least one primary concern');
+    }
+    
+    // Check if therapy experience is selected
+    if (!profileData.therapyExperience) {
+      errors.push('Please select your previous therapy experience');
+    }
+    
+    // Check if communication style is selected
+    if (!profileData.preferredCommunicationStyle) {
+      errors.push('Please select your preferred communication style');
+    }
+    
+    return errors;
+  };
+
   const nextStep = () => {
+    // Validate Mental Health Profile step (Step 2) before proceeding
+    if (currentStep === 2) {
+      const errors = validateMentalHealthStep();
+      if (errors.length > 0) {
+        // Show error messages
+        errors.forEach(error => toast.error(error));
+        return; // Don't proceed to next step
+      }
+    }
+    
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -278,7 +317,7 @@ const OnboardingFlow = () => {
             {['None', 'Some (less than 6 months)', 'Moderate (6 months - 2 years)', 'Extensive (2+ years)'].map(option => (
               <button
                 key={option}
-                onClick={() => updateProfileData('therapyExperience', option)}
+                onClick={() => toggleSingleValue('therapyExperience', option)}
                 className={`w-full p-3 rounded-lg border text-left transition-all ${
                   profileData.therapyExperience === option
                     ? 'bg-green-50 border-green-500 text-green-700'
@@ -297,7 +336,7 @@ const OnboardingFlow = () => {
             {['Gentle and supportive', 'Direct and straightforward', 'Motivational and encouraging', 'Clinical and informative'].map(style => (
               <button
                 key={style}
-                onClick={() => updateProfileData('preferredCommunicationStyle', style)}
+                onClick={() => toggleSingleValue('preferredCommunicationStyle', style)}
                 className={`w-full p-3 rounded-lg border text-left transition-all ${
                   profileData.preferredCommunicationStyle === style
                     ? 'bg-green-50 border-green-500 text-green-700'

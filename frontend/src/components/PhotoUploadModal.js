@@ -9,6 +9,14 @@ const PhotoUploadModal = ({ isOpen, onClose, currentPhoto, onSave }) => {
   const [previewPhoto, setPreviewPhoto] = useState(currentPhoto || null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Reset to current photo when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelectedPhoto(currentPhoto || null);
+      setPreviewPhoto(currentPhoto || null);
+    }
+  }, [isOpen, currentPhoto]);
+
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
