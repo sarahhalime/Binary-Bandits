@@ -561,7 +561,7 @@ const BreathingExercise = ({ onBack }) => {
   };
 
   if (!duration) {
-    return (
+  return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 pt-20 pb-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.button
@@ -573,14 +573,14 @@ const BreathingExercise = ({ onBack }) => {
           </motion.button>
 
           <div className="text-center mb-12">
-            <motion.div
+      <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl"
             >
               <Wind className="w-12 h-12 text-white" />
-            </motion.div>
-            
+      </motion.div>
+
             <h1 className="text-3xl font-bold text-slate-800 mb-4">Guided Breathing</h1>
             <p className="text-slate-600 text-lg">
               Choose your session duration to begin this calming breathing exercise
@@ -623,7 +623,7 @@ const BreathingExercise = ({ onBack }) => {
       {/* Background Animation */}
       <div className="absolute inset-0">
         {[...Array(20)].map((_, i) => (
-          <motion.div
+      <motion.div
             key={i}
             className="absolute w-2 h-2 bg-white/20 rounded-full"
             animate={{
@@ -760,7 +760,7 @@ const MindfulnessMeditation = ({ onBack }) => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 pt-20 pb-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.button
+            <motion.button
             onClick={onBack}
             className="flex items-center space-x-2 text-slate-600 hover:text-slate-800 mb-8"
           >
@@ -805,10 +805,10 @@ const MindfulnessMeditation = ({ onBack }) => {
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
                     <Play className="w-6 h-6 text-purple-600 ml-1" />
                   </div>
-                </div>
-              </motion.button>
-            ))}
-          </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
         </div>
       </div>
     );
@@ -907,7 +907,7 @@ const MindfulnessMeditation = ({ onBack }) => {
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             className="w-20 h-20 rounded-full border-2 border-white/30"
           />
-        </motion.div>
+      </motion.div>
 
         <motion.div
           key={currentPrompt}
@@ -1074,11 +1074,11 @@ const CognitiveReframing = ({ onBack }) => {
               <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-lg border border-white/40 mb-8">
                 <h2 className="text-2xl font-semibold text-slate-800 mb-6 text-center">
                   Let's examine this thought together
-                </h2>
-                
+          </h2>
+
                 <div className="bg-gray-50 p-4 rounded-lg mb-8">
                   <p className="text-slate-700 italic">"{thought}"</p>
-                </div>
+            </div>
 
                 <div className="space-y-6">
                   <p className="text-slate-600 text-center mb-8">
@@ -1086,10 +1086,10 @@ const CognitiveReframing = ({ onBack }) => {
                   </p>
                   
                   {reframingQuestions.map((question, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.2 }}
                       className="flex items-start space-x-4 p-4 bg-green-50 rounded-lg"
                     >
@@ -1157,7 +1157,7 @@ const CognitiveReframing = ({ onBack }) => {
                     <h3 className="font-semibold text-green-800 mb-2">Reframed Thought:</h3>
                     <p className="text-green-700 font-medium">{reframedThought}</p>
                   </motion.div>
-                </div>
+                    </div>
 
                 <div className="text-center mt-8">
                   <p className="text-slate-600 mb-6">
@@ -1178,16 +1178,16 @@ const CognitiveReframing = ({ onBack }) => {
                       Back to Activities
                     </button>
                   </div>
-                </div>
-              </div>
-            </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
           )}
         </AnimatePresence>
 
         {/* Floating thought bubbles animation */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           {[...Array(5)].map((_, i) => (
-            <motion.div
+        <motion.div
               key={i}
               className="absolute w-16 h-16 bg-white/20 rounded-full"
               animate={{
