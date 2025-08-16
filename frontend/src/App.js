@@ -11,6 +11,7 @@ import Journal from './pages/Journal';
 import Activities from './pages/Activities';
 import Social from './pages/Social';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import OnboardingFlow from './components/OnboardingFlow';
 import Dashboard from './pages/Dashboard';
 import './index.css';
@@ -97,6 +98,11 @@ function AppContent() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           } />
           <Route path="/onboarding" element={

@@ -174,7 +174,7 @@ const Navbar = () => {
                     </Link>
                     
                     <Link
-                      to="/profile"
+                      to="/settings"
                       onClick={() => setIsProfileDropdownOpen(false)}
                       className="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:bg-slate-50 transition-colors duration-200"
                     >
