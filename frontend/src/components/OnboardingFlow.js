@@ -167,6 +167,18 @@ const OnboardingFlow = () => {
     return errors;
   };
 
+  // Validation for Goals step
+  const validateGoalsStep = () => {
+    const errors = [];
+    
+    // Check if at least one mental health goal is selected
+    if (profileData.goals.length === 0) {
+      errors.push('Please select at least one mental health goal you hope to achieve');
+    }
+    
+    return errors;
+  };
+
   const nextStep = () => {
     // Validate Mental Health Profile step (Step 2) before proceeding
     if (currentStep === 2) {
@@ -191,6 +203,16 @@ const OnboardingFlow = () => {
     // Validate Preferences step (Step 4) before proceeding
     if (currentStep === 4) {
       const errors = validatePreferencesStep();
+      if (errors.length > 0) {
+        // Show error messages
+        errors.forEach(error => toast.error(error));
+        return; // Don't proceed to next step
+      }
+    }
+    
+    // Validate Goals step (Step 5) before proceeding
+    if (currentStep === 5) {
+      const errors = validateGoalsStep();
       if (errors.length > 0) {
         // Show error messages
         errors.forEach(error => toast.error(error));
@@ -716,7 +738,7 @@ const OnboardingFlow = () => {
             ].map(style => (
               <button
                 key={style}
-                onClick={() => updateProfileData('motivationalStyle', style)}
+                onClick={() => toggleSingleValue('motivationalStyle', style)}
                 className={`w-full p-3 rounded-lg border text-left transition-all ${
                   profileData.motivationalStyle === style
                     ? 'bg-orange-50 border-orange-500 text-orange-700'
