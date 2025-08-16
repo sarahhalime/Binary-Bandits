@@ -3,8 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Heart, User, Mail, Lock } from 'lucide-react';
+import AnimatedBackground from '../components/AnimatedBackground.js';
 
 const Register = () => {
+  // Track keystrokes for bubble animation
+  const [inputKey, setInputKey] = useState(0);
   const navigate = useNavigate();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
@@ -25,6 +28,7 @@ const Register = () => {
       ...prev,
       [name]: value
     }));
+  setInputKey(prev => prev + 1); // Increment key for animation
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -85,7 +89,7 @@ const Register = () => {
         name: formData.name
       });
       if (result.success) {
-        navigate('/');
+        navigate('/mood-gate'); // Show mood question first
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -94,56 +98,125 @@ const Register = () => {
     }
   };
 
+  // Bubble config (copied from Login.js)
+  const bubbleColors = [
+    'rgba(255,255,255,0.35)',
+    'rgba(255,255,255,0.25)',
+    'rgba(255,255,255,0.18)',
+  ];
+  const [bubbles] = useState(() =>
+    Array.from({ length: 16 }).map((_, i) => ({
+      size: Math.random() * 160 + 100,
+      left: Math.random() * 90 + '%',
+      top: Math.random() * 90 + '%',
+      color: bubbleColors[i % bubbleColors.length],
+      duration: Math.random() * 10 + 8,
+      delay: Math.random() * 6,
+      blur: Math.random() * 8 + 6,
+      opacity: Math.random() * 0.3 + 0.3,
+      direction: i % 2 === 0 ? 1 : -1,
+      rotate: Math.random() * 30 - 15,
+    }))
+  );
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 bg-gradient-to-br from-calm-50 to-primary-50"></div>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative max-w-md w-full space-y-8"
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #e3f0ff 0%, #f8faff 100%)' }}>
+      <AnimatedBackground />
+      {/* Animated Bubbles */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
       >
-        {/* Logo and Title */}
+        {bubbles.map((bubble, i) => (
+          <motion.div
+            key={i}
+            initial={{ y: 0, scale: 1, rotate: 0 }}
+            animate={{
+              y: bubble.direction * 100,
+              scale: 1.08,
+              rotate: bubble.rotate,
+            }}
+            transition={{
+              repeat: Infinity,
+              repeatType: 'reverse',
+              duration: bubble.duration,
+              delay: bubble.delay,
+              ease: 'easeInOut',
+            }}
+            style={{
+              position: 'absolute',
+              left: bubble.left,
+              top: bubble.top,
+              width: bubble.size,
+              height: bubble.size,
+              borderRadius: '50%',
+              background: bubble.color,
+              boxShadow: `0 0 80px 20px ${bubble.color}, inset 0 0 40px 10px #fff8`,
+              filter: `blur(${bubble.blur}px)`,
+              opacity: bubble.opacity,
+              zIndex: 1,
+              transition: 'background 0.3s',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: '20%',
+              left: '20%',
+              width: '60%',
+              height: '60%',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle at 30% 30%, #fff8 60%, transparent 100%)',
+              opacity: 0.7,
+              filter: 'blur(4px)',
+            }} />
+          </motion.div>
+        ))}
+      </div>
+      <div className="relative z-10 w-full max-w-md mx-auto">
         <div className="text-center">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center mb-4"
+            className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center mb-4 shadow-lg"
           >
             <Heart className="text-white" size={32} />
           </motion.div>
-          
           <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-3xl font-bold text-gray-900 mb-2"
+            className="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight"
+            style={{letterSpacing: '-1px'}}
           >
-            Join Mindful Harmony
+            Create Account
           </motion.h2>
-          
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-gray-600"
+            className="text-lg text-black mb-2 tracking-tight"
+            style={{letterSpacing: '-1px'}}
           >
-            Start your mental health journey today
+            Sign up to start your mental health journey
           </motion.p>
         </div>
-
-        {/* Registration Form */}
-        <motion.form
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="card space-y-6"
+        <form
+          className="bg-white bg-opacity-80 rounded-2xl shadow-xl p-8 mt-6 mb-4"
           onSubmit={handleSubmit}
         >
           {/* Name Field */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-base font-semibold text-gray-800 mb-2">
               Full Name
             </label>
             <div className="relative">
@@ -172,8 +245,8 @@ const Register = () => {
           </div>
 
           {/* Username Field */}
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-4">
+            <label htmlFor="username" className="block text-base font-semibold text-gray-800 mb-2">
               Username
             </label>
             <div className="relative">
@@ -202,8 +275,8 @@ const Register = () => {
           </div>
 
           {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-base font-semibold text-gray-800 mb-2">
               Email Address
             </label>
             <div className="relative">
@@ -216,7 +289,7 @@ const Register = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`input-field pl-10 ${errors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
+                className={`input-field pl-10 mt-0 ${errors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
                 placeholder="Enter your email"
               />
             </div>
@@ -232,8 +305,8 @@ const Register = () => {
           </div>
 
           {/* Password Field */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-base font-semibold text-gray-800 mb-2">
               Password
             </label>
             <div className="relative">
@@ -269,8 +342,8 @@ const Register = () => {
           </div>
 
           {/* Confirm Password Field */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-4">
+            <label htmlFor="confirmPassword" className="block text-base font-semibold text-gray-800 mb-2">
               Confirm Password
             </label>
             <div className="relative">
@@ -311,46 +384,48 @@ const Register = () => {
             disabled={loading}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`w-full btn-primary py-3 text-lg font-medium ${
+            className={`w-full bg-gradient-to-r from-purple-500 to-pink-400 text-white font-bold py-3 text-lg rounded-xl shadow-md transition-all duration-200 mb-6 ${
               loading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
+            style={{letterSpacing: '0.5px'}}
           >
             {loading ? (
               <div className="flex items-center justify-center">
                 <div className="spinner mr-2"></div>
-                Creating account...
+                Signing up...
               </div>
             ) : (
-              'Create Account'
+              'Sign Up'
             )}
           </motion.button>
 
           {/* Login Link */}
           <div className="text-center">
-            <p className="text-gray-600">
+            <p className="text-base text-gray-500">
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                className="font-semibold text-purple-500 hover:text-pink-400 transition-colors underline"
               >
                 Sign in here
               </Link>
             </p>
           </div>
-        </motion.form>
+  </form>
 
-        {/* Decorative Elements */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-center text-gray-500 text-sm"
+          className="text-center text-black text-sm mt-4"
         >
-          <p>Join thousands of users on their mental health journey 💙</p>
+          <p className="font-serif font-semibold italic tracking-wide drop-shadow-sm">
+            Your mental health matters <span role="img" aria-label="blue heart">💙</span>
+          </p>
         </motion.div>
-      </motion.div>
-    </div>
+  </div>
+  </div>
   );
-};
+}
 
 export default Register;

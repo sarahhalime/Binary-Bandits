@@ -20,15 +20,32 @@ from models.database import init_db
 # Load environment variables
 load_dotenv()
 
+# Debug: Check if .env variables are loaded
+print(f"Debug - Environment loading:")
+print(f"  SPOTIFY_CLIENT_ID exists: {bool(os.getenv('SPOTIFY_CLIENT_ID'))}")
+print(f"  SPOTIFY_CLIENT_SECRET exists: {bool(os.getenv('SPOTIFY_CLIENT_SECRET'))}")
+print(f"  Current working directory: {os.getcwd()}")
+print(f"  .env file exists: {os.path.exists('.env')}")
+
 app = Flask(__name__)
 
-# Configuration
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'your-secret-key')
+# Production Configuration
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'fallback-secret-key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
-app.config['MONGODB_URI'] = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/mindful_harmony')
+app.config['MONGODB_URI'] = os.getenv('MONGODB_URI')
+
+# Environment-based CORS configuration
+FRONTEND_URLS = [
+    'http://localhost:3000',  # Local development
+    'http://localhost:3001',  # Alternative local
+    os.getenv('FRONTEND_URL', ''),  # Production frontend URL
+]
+
+# Filter out empty URLs
+FRONTEND_URLS = [url for url in FRONTEND_URLS if url]
 
 # Initialize extensions
-CORS(app, origins=['http://localhost:3000', 'http://localhost:3001'], supports_credentials=True)
+CORS(app, origins=FRONTEND_URLS, supports_credentials=True)
 jwt = JWTManager(app)
 
 # Initialize database
@@ -61,4 +78,6 @@ def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    port = int(os.getenv('PORT', 5001))
+    debug_mode = os.getenv('FLASK_ENV', 'production') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)

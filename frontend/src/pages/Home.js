@@ -139,6 +139,27 @@ const Home = () => {
     }
   ];
 
+  const starRef = React.useRef(null);
+  const [showDust, setShowDust] = React.useState(false);
+  const [showStar, setShowStar] = React.useState(true);
+
+  React.useEffect(() => {
+    // Hide the shooting star after animation duration (e.g., 5.2s)
+    const timer = setTimeout(() => setShowStar(false), 5200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  React.useEffect(() => {
+    if (starRef.current) {
+      starRef.current.style.animation = 'none';
+      void starRef.current.offsetWidth;
+      starRef.current.style.animation = '';
+      setTimeout(() => setShowDust(true), 2200); // Show dust near end of animation
+      setTimeout(() => setShowDust(false), 2600); // Hide dust after animation
+      setTimeout(() => setShowStar(false), 2600); // Hide star after animation
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -148,10 +169,13 @@ const Home = () => {
   }
 
   return (
+<<<<<<< HEAD
 // ...existing code...
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Welcome Section */}
 // ...existing code...
+=======
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
     <div className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 relative overflow-hidden" style={{ background: 'radial-gradient(ellipse at top left, #5a2ea6 0%, #8e44ad 40%, #d76d77 70%, #ffaf7b 100%)' }}>
 
       
@@ -185,6 +209,7 @@ const Home = () => {
           filter: 'blur(32px)',
         }} />
         {/* Animated stars */}
+<<<<<<< HEAD
           {[...Array(80)].map((_, i) => {
             const duration = Math.random() * 2 + 1;
             const delay = Math.random() * 2;
@@ -208,6 +233,26 @@ const Home = () => {
               />
             );
           })}
+=======
+        {[...Array(80)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 2 + 1}px`,
+              height: `${Math.random() * 2 + 1}px`,
+              borderRadius: '50%',
+              background: 'white',
+              opacity: Math.random() * 0.6 + 0.2,
+              filter: 'blur(0.7px)',
+              zIndex: 0,
+              animation: `twinkle ${Math.random() * 2 + 1}s infinite alternate`,
+            }}
+          />
+        ))}
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
       </div>
       {/* Galaxy nebula glows */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -260,6 +305,7 @@ const Home = () => {
       </div>
       <style>{`
         @keyframes twinkle {
+<<<<<<< HEAD
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
         }
@@ -302,12 +348,17 @@ const Home = () => {
           20% { opacity: 1; }
           80% { opacity: 1; }
           100% { opacity: 0; transform: scale(1.2) translateY(-30px); }
+=======
+          from { opacity: 0.3; }
+          to { opacity: 1; }
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
         }
       `}</style>
       {/* Shooting Star Animation Above Welcome */}
       {/* Shooting star flies fully across, tail visible and fading, sprinkle dust at far right edge */}
       {/** Only render the SVG while the animation is running */}
       {showStar && (
+<<<<<<< HEAD
         <div style={{ position: 'absolute', left: 0, top: '30px', width: '100vw', height: '60px', pointerEvents: 'none', zIndex: 30 }}>
           <svg style={{ width: '100vw', height: '60px', overflow: 'visible', position: 'absolute', left: 0, top: 0 }}>
             <g id="shootingStarGroup">
@@ -329,12 +380,39 @@ const Home = () => {
             </g>
             <defs>
               <linearGradient id="tailGradient" x1="0" y1="30" x2="1200" y2="20" gradientUnits="userSpaceOnUse">
+=======
+        <div style={{ position: 'absolute', left: 0, top: '90px', width: '100vw', height: '80px', pointerEvents: 'none', zIndex: 30 }}>
+          <svg style={{ width: '100vw', height: '80px', overflow: 'visible', position: 'absolute', left: 0, top: 0 }}>
+            <g id="shootingStarGroup">
+              {/* Tail - visible, trailing, fading out (shorter tail) */}
+              <path id="tail" d="M 0 60 Q 400 20, 1200 40" stroke="url(#tailGradient)" strokeWidth="12" fill="none" opacity="0.7" filter="url(#tailBlur)" />
+              {/* Star Head - glowing circle with starburst */}
+              <g id="starHead">
+                <circle cx="1200" cy="40" r="24" fill="url(#starGlow)" filter="url(#glow)" />
+                {/* Starburst */}
+                <g>
+                  <line x1="1200" y1="22" x2="1200" y2="58" stroke="#fff8b0" strokeWidth="3" opacity="0.7" />
+                  <line x1="1182" y1="40" x2="1218" y2="40" stroke="#fff8b0" strokeWidth="3" opacity="0.7" />
+                  <line x1="1190" y1="28" x2="1210" y2="52" stroke="#fff8b0" strokeWidth="2" opacity="0.5" />
+                  <line x1="1210" y1="28" x2="1190" y2="52" stroke="#fff8b0" strokeWidth="2" opacity="0.5" />
+                </g>
+                {/* Sparkle */}
+                <circle cx="1200" cy="40" r="5" fill="#fff" opacity="0.9" />
+              </g>
+            </g>
+            <defs>
+              <linearGradient id="tailGradient" x1="0" y1="60" x2="1200" y2="40" gradientUnits="userSpaceOnUse">
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
                 <stop stopColor="#fff8b0" />
                 <stop offset="0.3" stopColor="#FFD700" />
                 <stop offset="0.7" stopColor="#FFA500" />
                 <stop offset="1" stopColor="rgba(255,255,255,0)" />
               </linearGradient>
+<<<<<<< HEAD
               <radialGradient id="starGlow" cx="1200" cy="20" r="24" gradientUnits="userSpaceOnUse">
+=======
+              <radialGradient id="starGlow" cx="1200" cy="40" r="24" gradientUnits="userSpaceOnUse">
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
                 <stop offset="0%" stopColor="#fff8b0" stopOpacity="1" />
                 <stop offset="60%" stopColor="#FFD700" stopOpacity="0.7" />
                 <stop offset="100%" stopColor="#FFA500" stopOpacity="0" />
@@ -371,28 +449,106 @@ const Home = () => {
             }
             #shootingStarGroup {
               transform-box: fill-box;
+<<<<<<< HEAD
               transform-origin: 0px 30px;
+=======
+              transform-origin: 0px 60px;
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
               animation: moveStarGroup 5.2s cubic-bezier(0.4,0,0.2,1) 1;
             }
           `}</style>
         </div>
       )}
+<<<<<<< HEAD
 // ...existing code...
+=======
+>>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
-          Welcome back, {user?.name}! 👋
+        <h1 className="text-4xl font-bold mb-2" style={{ color: '#111', position: 'relative', zIndex: 20 }}>
+          Welcome back, {user?.name}! <span role="img" aria-label="wave">👋</span>
         </h1>
 <<<<<<< Updated upstream
         <p className="text-lg text-gray-600">
-          How are you feeling today?
         </p>
 =======
   {/* Removed empty textbox under welcome message */}
 >>>>>>> Stashed changes
+      </motion.div>
+      <style>{`
+        .flying-star {
+          animation: flyStar 5.2s cubic-bezier(0.4,0,0.2,1) 1;
+        }
+        @keyframes flyStar {
+          0% {
+            opacity: 0;
+            transform: translate(0, 0) scale(0.7);
+          }
+          10% {
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+          }
+          80% {
+            opacity: 1;
+            transform: translate(calc(100vw - 60px), calc(-70vh - 80px)) scale(1.2);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(calc(100vw + 0px), calc(-80vh - 120px)) scale(0.8);
+          }
+        }
+        @keyframes fallDust {
+          0% { opacity: 0; transform: translateY(0); }
+          10% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(30px); }
+        }
+      `}</style>
+
+      {/* Quick Actions Centered */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 justify-items-center w-full max-w-4xl"
+      >
+        {quickActions.map((action, index) => {
+          const Icon = action.icon;
+          return (
+            <motion.div
+              key={action.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+              className={`card cursor-pointer group relative w-full flex items-center px-10 py-12 ${
+                action.isNew ? 'ring-2 ring-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50' : ''
+              }`}
+              onClick={() => window.location.href = action.path}
+            >
+              {action.isNew && (
+                <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                  NEW
+                </div>
+              )}
+              <div className="flex items-center w-full">
+                <div className={`w-12 h-12 bg-${action.color}-100 rounded-lg flex items-center justify-center mr-6 group-hover:bg-${action.color}-200 transition-colors`}>
+                  <Icon className={`text-${action.color}-600`} size={28} />
+                </div>
+                <div className="flex flex-col items-start w-full">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {action.title}
+                  </h3>
+                  <p className="text-gray-600">
+                    {action.description}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {/* Current Mood Display */}
@@ -455,88 +611,6 @@ const Home = () => {
           </div>
         </motion.div>
       )}
-
-      {/* Mood Selection */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="card mb-8"
-      >
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          How are you feeling right now?
-        </h2>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {moods.map((mood, index) => (
-            <motion.button
-              key={mood.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleMoodSubmit(mood.name)}
-              disabled={submittingMood}
-              className={`mood-card ${mood.color} p-4 text-center transition-all duration-300 ${
-                submittingMood ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <div className="text-3xl mb-2">{mood.emoji}</div>
-              <div className="font-medium text-gray-700 capitalize">
-                {mood.name}
-              </div>
-            </motion.button>
-          ))}
-        </div>
-
-        {submittingMood && (
-          <div className="text-center mt-4">
-            <div className="spinner inline-block"></div>
-            <p className="text-gray-600 mt-2">Recording your mood...</p>
-          </div>
-        )}
-      </motion.div>
-
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-      >
-        {quickActions.map((action, index) => {
-          const Icon = action.icon;
-          return (
-            <motion.div
-              key={action.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              className={`card cursor-pointer group relative ${
-                action.isNew ? 'ring-2 ring-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50' : ''
-              }`}
-              onClick={() => window.location.href = action.path}
-            >
-              {action.isNew && (
-                <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                  NEW
-                </div>
-              )}
-              <div className={`w-12 h-12 bg-${action.color}-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-${action.color}-200 transition-colors`}>
-                <Icon className={`text-${action.color}-600`} size={24} />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                {action.title}
-              </h3>
-              <p className="text-gray-600">
-                {action.description}
-              </p>
-            </motion.div>
-          );
-        })}
-      </motion.div>
 
       {/* Insights */}
       {insights.length > 0 && (

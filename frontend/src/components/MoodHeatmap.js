@@ -72,6 +72,21 @@ const MoodHeatmap = () => {
     );
   }
 
+  if (!heatmapData) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">No mood data available</p>
+        <p className="text-xs text-gray-400 mt-2">Check console for errors</p>
+        <button 
+          onClick={loadHeatmapData}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry Loading
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
