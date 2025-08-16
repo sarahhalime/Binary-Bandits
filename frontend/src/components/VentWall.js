@@ -11,7 +11,8 @@ import {
   Clock,
   Tag,
   X,
-  MessageSquare
+  MessageSquare,
+  Trash2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -35,6 +36,12 @@ const VentWall = () => {
   const [showComments, setShowComments] = useState({});
   const [newComment, setNewComment] = useState({});
   const [loadingComments, setLoadingComments] = useState({});
+  
+  // Delete states
+  const [deletingPost, setDeletingPost] = useState({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState({});
+  const [deletingComment, setDeletingComment] = useState({});
+  const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState({});
 
   const moods = [
     { value: 'happy', label: 'Happy', emoji: '😊', color: 'text-yellow-600' },
@@ -67,7 +74,28 @@ const VentWall = () => {
       if (filter.tag) params.tag = filter.tag;
       
       const response = await socialAPI.getVentPosts(params);
-      setPosts(response.posts || []);
+      const posts = response.posts || [];
+      setPosts(posts);
+      
+      // Load comment counts for all posts
+      const commentCounts = {};
+      for (const post of posts) {
+        try {
+          const commentsResponse = await socialAPI.getComments(post.id);
+          commentCounts[post.id] = commentsResponse.comments?.length || 0;
+        } catch (error) {
+          console.error(`Error loading comments for post ${post.id}:`, error);
+          commentCounts[post.id] = 0;
+        }
+      }
+      
+      // Update posts with comment counts
+      const postsWithCounts = posts.map(post => ({
+        ...post,
+        comment_count: commentCounts[post.id] || 0
+      }));
+      setPosts(postsWithCounts);
+      
     } catch (error) {
       console.error('Error loading vent posts:', error);
       toast.error('Failed to load posts');
@@ -191,6 +219,66 @@ const VentWall = () => {
       console.error('Error creating comment:', error);
       const errorMessage = error.response?.data?.error || 'Failed to add comment';
       toast.error(errorMessage);
+    }
+  };
+
+  const deletePost = async (postId) => {
+    try {
+      setDeletingPost(prev => ({ ...prev, [postId]: true }));
+      await socialAPI.deleteVentPost(postId);
+      
+      // Remove the post from the posts list
+      setPosts(prev => prev.filter(post => post.id !== postId));
+      
+      // Clear related states
+      setComments(prev => {
+        const newComments = { ...prev };
+        delete newComments[postId];
+        return newComments;
+      });
+      setShowComments(prev => {
+        const newShowComments = { ...prev };
+        delete newShowComments[postId];
+        return newShowComments;
+      });
+      setShowDeleteConfirm(prev => ({ ...prev, [postId]: false }));
+      
+      toast.success('Post deleted successfully');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to delete post';
+      toast.error(errorMessage);
+    } finally {
+      setDeletingPost(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const deleteComment = async (commentId, postId) => {
+    try {
+      setDeletingComment(prev => ({ ...prev, [commentId]: true }));
+      await socialAPI.deleteComment(commentId);
+      
+      // Remove the comment from the comments list
+      setComments(prev => ({
+        ...prev,
+        [postId]: prev[postId]?.filter(comment => comment.id !== commentId) || []
+      }));
+      
+      // Update the post's comment count
+      setPosts(prev => prev.map(post => 
+        post.id === postId 
+          ? { ...post, comment_count: Math.max(0, (post.comment_count || 0) - 1) }
+          : post
+      ));
+      
+      setShowDeleteCommentConfirm(prev => ({ ...prev, [commentId]: false }));
+      toast.success('Comment deleted successfully');
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to delete comment';
+      toast.error(errorMessage);
+    } finally {
+      setDeletingComment(prev => ({ ...prev, [commentId]: false }));
     }
   };
 
@@ -425,9 +513,20 @@ const VentWall = () => {
                       {moodStyle.label}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <Clock size={14} />
-                    <span>{post.relative_time}</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Clock size={14} />
+                      <span>{post.relative_time}</span>
+                    </div>
+                    {post.can_delete && (
+                      <button
+                        onClick={() => setShowDeleteConfirm(prev => ({ ...prev, [post.id]: true }))}
+                        className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                        title="Delete post"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -483,9 +582,9 @@ const VentWall = () => {
                     className="flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700 mt-2"
                   >
                     <MessageSquare size={16} />
-                    <span>
-                      {comments[post.id]?.length || 0} Comments
-                    </span>
+                                         <span>
+                       {comments[post.id]?.length || post.comment_count || 0} Comments
+                     </span>
                   </button>
                 </div>
 
@@ -510,7 +609,7 @@ const VentWall = () => {
                               [post.id]: e.target.value
                             }))}
                             onKeyPress={(e) => e.key === 'Enter' && createComment(post.id)}
-                            className="flex-1 px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-transparent text-sm"
+                            className="vent-comment-input flex-1 px-3 py-2 text-sm"
                             maxLength={300}
                           />
                           <motion.button
@@ -557,6 +656,15 @@ const VentWall = () => {
                                 <span className="text-xs text-gray-500">
                                   Anonymous • {comment.relative_time}
                                 </span>
+                                {comment.can_delete && (
+                                  <button
+                                    onClick={() => setShowDeleteCommentConfirm(prev => ({ ...prev, [comment.id]: true }))}
+                                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                    title="Delete comment"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                )}
                               </div>
                             </motion.div>
                           ))}
@@ -577,6 +685,104 @@ const VentWall = () => {
           })
         )}
       </div>
+
+      {/* Delete Confirmation Modals */}
+      <AnimatePresence>
+        {Object.keys(showDeleteConfirm).map(postId => 
+          showDeleteConfirm[postId] && (
+            <div key={postId} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-white rounded-lg p-6 w-full max-w-sm"
+              >
+                <div className="text-center">
+                  <div className="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
+                    <Trash2 className="w-6 h-6 text-red-600" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Delete Post
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Are you sure you want to delete this post? This action cannot be undone and will also delete all comments.
+                  </p>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setShowDeleteConfirm(prev => ({ ...prev, [postId]: false }))}
+                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => deletePost(postId)}
+                      disabled={deletingPost[postId]}
+                      className={`flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors ${
+                        deletingPost[postId] ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {deletingPost[postId] ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )
+                 )}
+       </AnimatePresence>
+
+       {/* Delete Comment Confirmation Modals */}
+       <AnimatePresence>
+         {Object.keys(showDeleteCommentConfirm).map(commentId => 
+           showDeleteCommentConfirm[commentId] && (
+             <div key={commentId} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+               <motion.div
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 exit={{ opacity: 0, scale: 0.9 }}
+                 className="bg-white rounded-lg p-6 w-full max-w-sm"
+               >
+                 <div className="text-center">
+                   <div className="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
+                     <MessageSquare className="w-6 h-6 text-red-600" />
+                   </div>
+                   <h3 className="text-lg font-medium text-gray-900 mb-2">
+                     Delete Comment
+                   </h3>
+                   <p className="text-sm text-gray-500 mb-6">
+                     Are you sure you want to delete this comment? This action cannot be undone.
+                   </p>
+                   <div className="flex space-x-3">
+                     <button
+                       onClick={() => setShowDeleteCommentConfirm(prev => ({ ...prev, [commentId]: false }))}
+                       className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                     >
+                       Cancel
+                     </button>
+                     <button
+                       onClick={() => {
+                         // Find which post this comment belongs to
+                         const postId = Object.keys(comments).find(pid => 
+                           comments[pid]?.some(comment => comment.id === commentId)
+                         );
+                         if (postId) {
+                           deleteComment(commentId, postId);
+                         }
+                       }}
+                       disabled={deletingComment[commentId]}
+                       className={`flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors ${
+                         deletingComment[commentId] ? 'opacity-50 cursor-not-allowed' : ''
+                       }`}
+                     >
+                       {deletingComment[commentId] ? 'Deleting...' : 'Delete'}
+                     </button>
+                   </div>
+                 </div>
+               </motion.div>
+             </div>
+           )
+         )}
+       </AnimatePresence>
     </div>
   );
 };

@@ -45,7 +45,7 @@
   }
   
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 bg-white;
   }
   
   .mood-card {
@@ -247,14 +247,11 @@
   }
   
   .vent-comment-input {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(15px);
-    @apply border border-white/30 rounded-lg transition-all duration-200;
+    @apply bg-white border border-gray-300 rounded-lg transition-all duration-200;
   }
   
   .vent-comment-input:focus {
-    background: rgba(255, 255, 255, 0.3);
-    @apply ring-2 ring-pink-300 border-transparent;
+    @apply bg-white ring-2 ring-pink-300 border-transparent;
   }
   
   .vent-comment-button {

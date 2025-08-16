@@ -147,6 +147,9 @@ export const socialAPI = {
   removeVentReaction: (postId) => 
     api.delete(`/social/vent/${postId}/react`).then(res => res.data),
   
+  deleteVentPost: (postId) => 
+    api.delete(`/social/vent/${postId}`).then(res => res.data),
+  
   getVentStats: () => 
     api.get('/social/vent/stats').then(res => res.data),
   

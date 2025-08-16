@@ -129,6 +129,8 @@ def get_friends_list():
             ]
         }))
         
+        print(f"Found {len(connections)} friend connections for user {user_id}")
+        
         friends = []
         for connection in connections:
             # Determine which user is the friend
@@ -582,7 +584,8 @@ def get_vent_posts():
                     },
                     'reaction_count': 6,
                     'user_reaction': None,
-                    'relative_time': '2 hours ago'
+                    'relative_time': '2 hours ago',
+                    'can_delete': True  # Demo user can delete this post
                 },
                 {
                     'id': 'demo_vent_2',
@@ -596,7 +599,8 @@ def get_vent_posts():
                     },
                     'reaction_count': 7,
                     'user_reaction': 'heart',
-                    'relative_time': '5 hours ago'
+                    'relative_time': '5 hours ago',
+                    'can_delete': False  # Another user's post
                 },
                 {
                     'id': 'demo_vent_3',
@@ -611,7 +615,8 @@ def get_vent_posts():
                     },
                     'reaction_count': 15,
                     'user_reaction': 'support',
-                    'relative_time': '8 hours ago'
+                    'relative_time': '8 hours ago',
+                    'can_delete': False  # Another user's post
                 }
             ]
             
@@ -671,7 +676,8 @@ def get_vent_posts():
                 'reactions': reactions,
                 'reaction_count': sum(reactions.values()),
                 'user_reaction': user_reaction,
-                'relative_time': relative_time
+                'relative_time': relative_time,
+                'can_delete': str(post['user_id']) == str(user_id)  # User can only delete their own posts
             })
         
         return jsonify({
@@ -915,21 +921,24 @@ def get_comments(post_id):
                     'content': 'You\'re not alone in feeling this way. Sending you support! 💙',
                     'timestamp': (datetime.utcnow() - timedelta(minutes=30)).isoformat(),
                     'relative_time': '30 minutes ago',
-                    'is_anonymous': True
+                    'is_anonymous': True,
+                    'can_delete': True  # Demo user can delete this comment
                 },
                 {
                     'id': 'demo_comment_2',
                     'content': 'Thank you for sharing. Your courage to speak up inspires others.',
                     'timestamp': (datetime.utcnow() - timedelta(hours=1)).isoformat(),
                     'relative_time': '1 hour ago',
-                    'is_anonymous': True
+                    'is_anonymous': True,
+                    'can_delete': False  # Another user's comment
                 },
                 {
                     'id': 'demo_comment_3',
                     'content': 'This resonates with me so much. We\'re in this together! ✨',
                     'timestamp': (datetime.utcnow() - timedelta(hours=2)).isoformat(),
                     'relative_time': '2 hours ago',
-                    'is_anonymous': True
+                    'is_anonymous': True,
+                    'can_delete': False  # Another user's comment
                 }
             ]
             
@@ -965,7 +974,8 @@ def get_comments(post_id):
                 'content': comment['content'],
                 'timestamp': comment['timestamp'].isoformat(),
                 'relative_time': relative_time,
-                'is_anonymous': True  # Always anonymous for privacy
+                'is_anonymous': True,  # Always anonymous for privacy
+                'can_delete': str(comment['user_id']) == str(user_id)  # User can only delete their own comments
             })
         
         return jsonify({
@@ -1005,6 +1015,128 @@ def delete_comment(comment_id):
         
         return jsonify({
             'message': 'Comment deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@social_bp.route('/vent/<post_id>', methods=['DELETE'])
+@jwt_required()
+def delete_vent_post(post_id):
+    """Delete a vent post (only by the post author)"""
+    try:
+        user_id = get_jwt_identity()
+        db = get_db()
+        
+        # Demo mode - return success
+        if db is None:
+            return jsonify({
+                'message': 'Post deleted successfully'
+            }), 200
+        
+        # Find and delete the post (only if user is the author)
+        result = db.vent_posts.update_one(
+            {
+                '_id': ObjectId(post_id),
+                'user_id': ObjectId(user_id),
+                'is_active': True
+            },
+            {'$set': {'is_active': False}}
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'error': 'Post not found or unauthorized'}), 404
+        
+        # Also deactivate all comments on this post
+        db.vent_comments.update_many(
+            {
+                'post_id': ObjectId(post_id),
+                'is_active': True
+            },
+            {'$set': {'is_active': False}}
+        )
+        
+        return jsonify({
+            'message': 'Post deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Mood Heatmap Endpoint
+
+@social_bp.route('/mood-heatmap', methods=['GET'])
+@jwt_required()
+def get_mood_heatmap():
+    """Get mood heatmap data for visualization"""
+    try:
+        user_id = get_jwt_identity()
+        
+        # For now, return artificial data for demo
+        # Using Toronto coordinates as example
+        artificial_mood_data = [
+            # Downtown core - mixed emotions during work hours
+            {"lat": 43.6532, "lng": -79.3832, "mood": "stressed", "intensity": 0.8, "count": 15},
+            {"lat": 43.6500, "lng": -79.3800, "mood": "anxious", "intensity": 0.7, "count": 12},
+            {"lat": 43.6550, "lng": -79.3850, "mood": "neutral", "intensity": 0.5, "count": 20},
+            
+            # Financial district - high stress
+            {"lat": 43.6481, "lng": -79.3809, "mood": "stressed", "intensity": 0.9, "count": 25},
+            {"lat": 43.6475, "lng": -79.3790, "mood": "anxious", "intensity": 0.8, "count": 18},
+            
+            # Parks and recreational areas - happier moods
+            {"lat": 43.6534, "lng": -79.3839, "mood": "happy", "intensity": 0.6, "count": 8},
+            {"lat": 43.6553, "lng": -79.3872, "mood": "calm", "intensity": 0.7, "count": 10},
+            {"lat": 43.6505, "lng": -79.3758, "mood": "happy", "intensity": 0.8, "count": 12},
+            
+            # Residential areas - more calm/neutral
+            {"lat": 43.6600, "lng": -79.3900, "mood": "calm", "intensity": 0.6, "count": 6},
+            {"lat": 43.6450, "lng": -79.3700, "mood": "neutral", "intensity": 0.4, "count": 14},
+            
+            # University area - mixed but trending anxious (students)
+            {"lat": 43.6629, "lng": -79.3957, "mood": "anxious", "intensity": 0.6, "count": 22},
+            {"lat": 43.6640, "lng": -79.3980, "mood": "stressed", "intensity": 0.7, "count": 16},
+            
+            # Entertainment district - happier in evening
+            {"lat": 43.6426, "lng": -79.3871, "mood": "happy", "intensity": 0.7, "count": 9},
+            {"lat": 43.6435, "lng": -79.3865, "mood": "energetic", "intensity": 0.8, "count": 11},
+            
+            # Hospital area - mixed emotions
+            {"lat": 43.6563, "lng": -79.3904, "mood": "sad", "intensity": 0.5, "count": 7},
+            {"lat": 43.6570, "lng": -79.3910, "mood": "anxious", "intensity": 0.6, "count": 13},
+        ]
+        
+        # Add some variation to make it feel more "live"
+        import random
+        from datetime import datetime
+        
+        # Slightly randomize intensities to simulate real-time changes
+        for point in artificial_mood_data:
+            # Add small random variation (±0.1)
+            variation = random.uniform(-0.1, 0.1)
+            point['intensity'] = max(0.1, min(1.0, point['intensity'] + variation))
+            
+            # Add timestamp
+            point['timestamp'] = datetime.utcnow().isoformat()
+        
+        # Calculate summary stats
+        total_points = len(artificial_mood_data)
+        total_users = sum(point['count'] for point in artificial_mood_data)
+        
+        mood_counts = {}
+        for point in artificial_mood_data:
+            mood = point['mood']
+            mood_counts[mood] = mood_counts.get(mood, 0) + point['count']
+        
+        return jsonify({
+            'mood_points': artificial_mood_data,
+            'summary': {
+                'total_points': total_points,
+                'total_users': total_users,
+                'mood_breakdown': mood_counts,
+                'last_updated': datetime.utcnow().isoformat(),
+                'coverage_area': 'Toronto, ON'
+            }
         }), 200
         
     except Exception as e:
