@@ -199,7 +199,7 @@ const OnboardingFlow = () => {
               onChange={(e) => updateProfileData('age', e.target.value)}
             >
               <option value="">Select your age</option>
-              {Array.from({ length: 83 }, (_, i) => i + 13).map(age => (
+              {Array.from({ length: 78 }, (_, i) => i + 18).map(age => (
                 <option key={age} value={age}>{age}</option>
               ))}
             </select>
