@@ -10,6 +10,7 @@ import Music from './pages/Music';
 import Journal from './pages/Journal';
 import Activities from './pages/Activities';
 import Social from './pages/Social';
+import MoodMap from './pages/MoodMap';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import OnboardingFlow from './components/OnboardingFlow';
@@ -88,6 +89,11 @@ function AppContent() {
           <Route path="/activities" element={
             <ProtectedRoute>
               <Activities />
+            </ProtectedRoute>
+          } />
+          <Route path="/mood-map" element={
+            <ProtectedRoute>
+              <MoodMap />
             </ProtectedRoute>
           } />
           <Route path="/social" element={

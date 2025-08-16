@@ -14,7 +14,8 @@ import {
   X,
   Sparkles,
   Settings,
-  ChevronDown
+  ChevronDown,
+  Map
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -28,6 +29,7 @@ const Navbar = () => {
     { path: '/music', icon: Music, label: 'Music' },
     { path: '/journal', icon: BookOpen, label: 'Journal' },
     { path: '/activities', icon: Activity, label: 'Activities' },
+    { path: '/mood-map', icon: Map, label: 'Mood Map' },
     { path: '/social', icon: Users, label: 'Social' },
   ];
 
