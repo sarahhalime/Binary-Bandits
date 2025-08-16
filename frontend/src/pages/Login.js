@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Heart } from 'lucide-react';
+import AnimatedBackground from '../components/AnimatedBackground.tsx';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -69,14 +70,86 @@ const Login = () => {
     }
   };
 
+  // Bubble config
+  const bubbleColors = [
+    'rgba(255,255,255,0.35)',
+    'rgba(255,255,255,0.25)',
+    'rgba(255,255,255,0.18)',
+  ];
+  const bubbles = Array.from({ length: 16 }).map((_, i) => ({
+    size: Math.random() * 160 + 100,
+    left: Math.random() * 90 + '%',
+    top: Math.random() * 90 + '%',
+    color: bubbleColors[i % bubbleColors.length],
+    duration: Math.random() * 10 + 8,
+    delay: Math.random() * 6,
+    blur: Math.random() * 8 + 6,
+    opacity: Math.random() * 0.3 + 0.3,
+    direction: i % 2 === 0 ? 1 : -1,
+    rotate: Math.random() * 30 - 15,
+  }));
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 bg-gradient-to-br from-calm-50 to-primary-50"></div>
-      
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #e3f0ff 0%, #f8faff 100%)' }}>
+      <AnimatedBackground />
+      {/* Animated Bubbles */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
+      >
+        {bubbles.map((bubble, i) => (
+          <motion.div
+            key={i}
+            initial={{ y: 0, scale: 1, rotate: 0 }}
+            animate={{
+              y: bubble.direction * 100,
+              scale: 1.08,
+              rotate: bubble.rotate,
+            }}
+            transition={{ repeat: Infinity, repeatType: 'reverse', duration: bubble.duration, delay: bubble.delay, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute',
+              left: bubble.left,
+              top: bubble.top,
+              width: bubble.size,
+              height: bubble.size,
+              borderRadius: '50%',
+              background: bubble.color,
+              boxShadow: `0 0 80px 20px ${bubble.color}, inset 0 0 40px 10px #fff8`,
+              filter: `blur(${bubble.blur}px)`,
+              opacity: bubble.opacity,
+              zIndex: 1,
+              transition: 'background 0.3s',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: '20%',
+              left: '20%',
+              width: '60%',
+              height: '60%',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle at 30% 30%, #fff8 60%, transparent 100%)',
+              opacity: 0.7,
+              filter: 'blur(4px)',
+            }} />
+          </motion.div>
+        ))}
+      </div>
+      {/* Login Card and Content */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative max-w-md w-full space-y-8"
+        className="relative max-w-md w-full space-y-8 z-10"
       >
         {/* Logo and Title */}
         <div className="text-center">
