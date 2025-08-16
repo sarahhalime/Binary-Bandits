@@ -253,6 +253,5 @@ const Dashboard = () => {
     </div>
   );
 };
-  {/* Mood selector and related texts removed */}
 
 export default Dashboard;
