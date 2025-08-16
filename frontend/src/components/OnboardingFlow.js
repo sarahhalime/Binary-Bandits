@@ -147,28 +147,6 @@ const OnboardingFlow = () => {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-          <input
-            type="text"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="What should we call you?"
-            value={profileData.name}
-            onChange={(e) => updateProfileData('name', e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
-          <input
-            type="number"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Your age"
-            value={profileData.age}
-            onChange={(e) => updateProfileData('age', e.target.value)}
-          />
-        </div>
-
-        <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
           <div className="flex items-center space-x-4">
             {profileData.profilePhoto ? (
@@ -187,6 +165,38 @@ const OnboardingFlow = () => {
               Upload Photo
               <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
             </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+          <input
+            type="text"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="What should we call you?"
+            value={profileData.name}
+            onChange={(e) => updateProfileData('name', e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+          <div className="relative">
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer bg-white"
+              value={profileData.age}
+              onChange={(e) => updateProfileData('age', e.target.value)}
+            >
+              <option value="">Select your age</option>
+              {Array.from({ length: 83 }, (_, i) => i + 13).map(age => (
+                <option key={age} value={age}>{age}</option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
           </div>
         </div>
 
