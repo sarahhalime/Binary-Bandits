@@ -1,3 +1,4 @@
+# backend/app.py
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
@@ -16,7 +17,7 @@ from routes.profile import profile_bp
 from routes.voice import voice_bp
 
 # Import database
-from models.database import init_db
+from models.database import init_db, get_db  
 
 # Load environment variables
 load_dotenv()
@@ -36,19 +37,17 @@ jwt = JWTManager(app)
 # Initialize database
 init_db(app)
 
-# Register blueprints
+# Register blueprints (each file uses root path "/" so final URLs are exactly these)
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(mood_bp, url_prefix='/api/mood')
 app.register_blueprint(journal_bp, url_prefix='/api/journal')
 app.register_blueprint(activities_bp, url_prefix='/api/activities')
 app.register_blueprint(social_bp, url_prefix='/api/social')
 app.register_blueprint(music_bp, url_prefix='/api/music')
-app.register_blueprint(profile_bp, url_prefix='/api/profile')
 app.register_blueprint(voice_bp, url_prefix='/api/voice')
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.utcnow().isoformat(),
@@ -57,11 +56,9 @@ def health_check():
 
 @app.route('/api/health/db', methods=['GET'])
 def health_check_db():
-    """Database health check endpoint"""
     try:
         db = get_db()
         if db is not None:
-            # Test database connection
             db.command('ping')
             return jsonify({'db': 'ok'}), 200
         else:
@@ -78,4 +75,5 @@ def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
+    # change port here if 5001 is busy
     app.run(debug=True, host='0.0.0.0', port=5001)
