@@ -157,25 +157,25 @@ const Login = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center mb-4"
+            className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center mb-4 shadow-lg"
           >
             <Heart className="text-white" size={32} />
           </motion.div>
-          
           <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-3xl font-bold text-gray-900 mb-2"
+            className="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight"
+            style={{letterSpacing: '-1px'}}
           >
             Welcome Back
           </motion.h2>
-          
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-gray-600"
+            className="text-lg text-black mb-2 tracking-tight"
+            style={{letterSpacing: '-1px'}}
           >
             Sign in to continue your mental health journey
           </motion.p>
@@ -191,7 +191,7 @@ const Login = () => {
         >
           {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-base font-semibold text-gray-800 mb-2">
               Email Address
             </label>
             <input
@@ -218,7 +218,7 @@ const Login = () => {
 
           {/* Password Field */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-base font-semibold text-gray-800 mb-2">
               Password
             </label>
             <div className="relative">
@@ -258,9 +258,10 @@ const Login = () => {
             disabled={loading}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`w-full btn-primary py-3 text-lg font-medium ${
+            className={`w-full bg-gradient-to-r from-purple-500 to-pink-400 text-white font-bold py-3 text-lg rounded-xl shadow-md transition-all duration-200 ${
               loading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
+            style={{letterSpacing: '0.5px'}}
           >
             {loading ? (
               <div className="flex items-center justify-center">
@@ -274,11 +275,11 @@ const Login = () => {
 
           {/* Register Link */}
           <div className="text-center">
-            <p className="text-gray-600">
+            <p className="text-base text-gray-500">
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                className="font-semibold text-purple-500 hover:text-pink-400 transition-colors underline"
               >
                 Sign up here
               </Link>
@@ -291,9 +292,11 @@ const Login = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-center text-gray-500 text-sm"
+          className="text-center text-black text-base mt-4"
         >
-          <p>Your mental health matters 💙</p>
+          <p className="font-serif font-semibold italic tracking-wide drop-shadow-sm">
+            Your mental health matters <span role="img" aria-label="blue heart">💙</span>
+          </p>
         </motion.div>
       </motion.div>
     </div>
