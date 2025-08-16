@@ -1,25 +1,41 @@
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 import os
 import random
+from datetime import datetime
 
 class SpotifyService:
     def __init__(self):
         """Initialize Spotify service with client credentials"""
         self.client_id = os.getenv('SPOTIFY_CLIENT_ID')
         self.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:8888/callback')
+        
+        # Debug: Print what we're getting from environment
+        print(f"Debug - Loaded Client ID: {self.client_id[:10] + '...' if self.client_id else 'None'}")
+        print(f"Debug - Loaded Client Secret: {self.client_secret[:10] + '...' if self.client_secret else 'None'}")
+        print(f"Debug - Redirect URI: {self.redirect_uri}")
         
         # Initialize Spotify client if credentials are available
         if self.client_id and self.client_secret:
-            self.sp = spotipy.Spotify(
-                client_credentials_manager=SpotifyClientCredentials(
-                    client_id=self.client_id,
-                    client_secret=self.client_secret
+            try:
+                # Client credentials for public data (search, recommendations)
+                self.sp = spotipy.Spotify(
+                    client_credentials_manager=SpotifyClientCredentials(
+                        client_id=self.client_id,
+                        client_secret=self.client_secret
+                    )
                 )
-            )
-            self.spotify_available = True
+                self.spotify_available = True
+                print("✅ Spotify service initialized successfully")
+            except Exception as e:
+                print(f"❌ Failed to initialize Spotify service: {e}")
+                self.sp = None
+                self.spotify_available = False
         else:
-            print("Warning: Spotify credentials not found. Music features will be limited.")
+            print("❌ Warning: Spotify credentials not found. Music features will be limited.")
+            print(f"Client ID present: {bool(self.client_id)}")
+            print(f"Client Secret present: {bool(self.client_secret)}")
             self.sp = None
             self.spotify_available = False
         
@@ -297,3 +313,112 @@ class SpotifyService:
             'total_tracks': len(formatted_tracks),
             'fallback': True
         }
+    
+    def get_oauth_url(self, state=None):
+        """Get Spotify OAuth authorization URL"""
+        if not self.client_id or not self.client_secret:
+            print("Missing Spotify credentials for OAuth")
+            return None
+            
+        try:
+            oauth = SpotifyOAuth(
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+                redirect_uri=self.redirect_uri,
+                scope="playlist-modify-public playlist-modify-private",
+                state=state
+            )
+            
+            auth_url = oauth.get_authorize_url()
+            print(f"Generated OAuth URL: {auth_url}")
+            return auth_url
+        except Exception as e:
+            print(f"Error generating OAuth URL: {e}")
+            return None
+    
+    def handle_oauth_callback(self, code, state=None):
+        """Handle OAuth callback and get access token"""
+        if not self.client_id or not self.client_secret:
+            return None
+            
+        oauth = SpotifyOAuth(
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            redirect_uri=self.redirect_uri,
+            scope="playlist-modify-public playlist-modify-private",
+            state=state
+        )
+        
+        try:
+            token_info = oauth.get_access_token(code)
+            return token_info
+        except Exception as e:
+            print(f"Error getting access token: {e}")
+            return None
+    
+    def create_spotify_playlist(self, access_token, mood, intensity, tracks):
+        """Create a playlist in the user's Spotify account"""
+        try:
+            # Create authenticated Spotify client
+            sp_user = spotipy.Spotify(auth=access_token)
+            
+            # Get user's Spotify ID
+            user_info = sp_user.me()
+            user_id = user_info['id']
+            
+            # Create playlist name with timestamp
+            date_str = datetime.now().strftime("%Y-%m-%d")
+            playlist_name = f"My {mood.title()} Mood Playlist - {date_str}"
+            playlist_description = f"Generated based on {mood} mood with intensity {intensity}/10 from Mindful Harmony"
+            
+            # Create the playlist
+            playlist = sp_user.user_playlist_create(
+                user=user_id,
+                name=playlist_name,
+                public=False,  # Private by default
+                description=playlist_description
+            )
+            
+            # Add tracks to playlist if we have any
+            if tracks:
+                track_uris = []
+                for track in tracks:
+                    if track.get('id') and not track['id'].startswith('fallback_'):
+                        track_uris.append(f"spotify:track:{track['id']}")
+                
+                if track_uris:
+                    # Add tracks in batches of 100 (Spotify limit)
+                    for i in range(0, len(track_uris), 100):
+                        batch = track_uris[i:i+100]
+                        sp_user.playlist_add_items(playlist['id'], batch)
+            
+            return {
+                'success': True,
+                'playlist_id': playlist['id'],
+                'playlist_url': playlist['external_urls']['spotify'],
+                'playlist_name': playlist_name,
+                'tracks_added': len(track_uris) if tracks else 0
+            }
+            
+        except Exception as e:
+            print(f"Error creating Spotify playlist: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def refresh_token(self, refresh_token):
+        """Refresh an expired access token"""
+        try:
+            oauth = SpotifyOAuth(
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+                redirect_uri=self.redirect_uri,
+                scope="playlist-modify-public playlist-modify-private"
+            )
+            
+            token_info = oauth.refresh_access_token(refresh_token)
+            return token_info
+        except Exception as e:
+            print(f"Error refreshing token: {e}")
+            return None

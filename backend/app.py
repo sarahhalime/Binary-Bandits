@@ -20,6 +20,13 @@ from models.database import init_db
 # Load environment variables
 load_dotenv()
 
+# Debug: Check if .env variables are loaded
+print(f"Debug - Environment loading:")
+print(f"  SPOTIFY_CLIENT_ID exists: {bool(os.getenv('SPOTIFY_CLIENT_ID'))}")
+print(f"  SPOTIFY_CLIENT_SECRET exists: {bool(os.getenv('SPOTIFY_CLIENT_SECRET'))}")
+print(f"  Current working directory: {os.getcwd()}")
+print(f"  .env file exists: {os.path.exists('.env')}")
+
 app = Flask(__name__)
 
 # Configuration
