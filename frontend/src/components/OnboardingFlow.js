@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ChevronRight, ChevronLeft, Upload, Check, User, Brain, Heart, Music, Calendar, Target } from 'lucide-react';
 import { authAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +13,7 @@ const OnboardingFlow = () => {
   const [profileData, setProfileData] = useState({
     // Basic Info
     name: user?.name || '',
+    nickname: '',
     age: '',
     profilePhoto: null,
     bio: '',
@@ -51,7 +52,7 @@ const OnboardingFlow = () => {
 
   const totalSteps = 6;
 
-  const updateProfileData = (field, value) => {
+  const updateProfileData = useCallback((field, value) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
       setProfileData(prev => ({
@@ -67,7 +68,7 @@ const OnboardingFlow = () => {
         [field]: value
       }));
     }
-  };
+  }, []);
 
   const toggleArrayValue = (field, value) => {
     setProfileData(prev => ({
@@ -170,13 +171,23 @@ const OnboardingFlow = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+          <div className="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed">
+            {profileData.name || 'Your registered name'}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">This matches your registered username</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Nickname (Display Name)</label>
           <input
+            key="nickname-input"
             type="text"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="What should we call you?"
-            value={profileData.name}
-            onChange={(e) => updateProfileData('name', e.target.value)}
+            placeholder="What should others call you?"
+            defaultValue={profileData.nickname || ''}
+            onChange={(e) => updateProfileData('nickname', e.target.value)}
           />
+          <p className="text-xs text-gray-500 mt-1">This is how other users will see your name</p>
         </div>
 
         <div>
@@ -202,13 +213,25 @@ const OnboardingFlow = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Tell us about yourself</label>
-          <textarea
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows="3"
-            placeholder="A brief description about yourself..."
-            value={profileData.bio}
-            onChange={(e) => updateProfileData('bio', e.target.value)}
-          />
+          <div className="relative">
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows="3"
+              placeholder="A brief description about yourself..."
+              value={profileData.bio || ''}
+              maxLength={200}
+              onChange={(e) => updateProfileData('bio', e.target.value)}
+            />
+            <div className="flex justify-between items-center mt-1">
+              <span className={`text-xs ${
+                (profileData.bio || '').length > 180 ? 'text-red-500' : 
+                (profileData.bio || '').length > 150 ? 'text-yellow-500' : 
+                'text-gray-500'
+              }`}>
+                {(profileData.bio || '').length}/200 characters
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
