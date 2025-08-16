@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PhotoUploadModal from './PhotoUploadModal';
+import TimeSelector from './TimeSelector';
 
 const OnboardingFlow = () => {
   const navigate = useNavigate();
@@ -122,10 +123,42 @@ const OnboardingFlow = () => {
     return errors;
   };
 
+  // Validation for Lifestyle step
+  const validateLifestyleStep = () => {
+    const errors = [];
+    
+    // Check if occupation is selected
+    if (!profileData.occupation) {
+      errors.push('Please select your occupation');
+    }
+    
+    // Check if bedtime is set
+    if (!profileData.sleepSchedule.bedtime) {
+      errors.push('Please set your usual bedtime');
+    }
+    
+    // Check if wake time is set
+    if (!profileData.sleepSchedule.wakeTime) {
+      errors.push('Please set your usual wake time');
+    }
+    
+    return errors;
+  };
+
   const nextStep = () => {
     // Validate Mental Health Profile step (Step 2) before proceeding
     if (currentStep === 2) {
       const errors = validateMentalHealthStep();
+      if (errors.length > 0) {
+        // Show error messages
+        errors.forEach(error => toast.error(error));
+        return; // Don't proceed to next step
+      }
+    }
+    
+    // Validate Lifestyle step (Step 3) before proceeding
+    if (currentStep === 3) {
+      const errors = validateLifestyleStep();
       if (errors.length > 0) {
         // Show error messages
         errors.forEach(error => toast.error(error));
@@ -382,58 +415,146 @@ const OnboardingFlow = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">
-            Current stress level: {profileData.stressLevel}/10
+            Current stress level: <span className={`font-bold ${
+              profileData.stressLevel <= 3 ? 'text-green-600' :
+              profileData.stressLevel <= 6 ? 'text-yellow-600' :
+              profileData.stressLevel <= 8 ? 'text-orange-600' :
+              'text-red-600'
+            }`}>{profileData.stressLevel}/10</span>
           </label>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            value={profileData.stressLevel}
-            onChange={(e) => updateProfileData('stressLevel', parseInt(e.target.value))}
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>Low stress</span>
-            <span>High stress</span>
+          <div className="relative">
+            <input
+              type="range"
+              min="1"
+              max="10"
+              className="w-full h-3 bg-gradient-to-r from-green-200 via-yellow-200 via-orange-200 to-red-200 rounded-lg appearance-none cursor-pointer stress-slider"
+              value={profileData.stressLevel}
+              onChange={(e) => updateProfileData('stressLevel', parseInt(e.target.value))}
+              style={{
+                background: `linear-gradient(to right, 
+                  #dcfce7 0%, #dcfce7 30%, 
+                  #fef3c7 30%, #fef3c7 60%, 
+                  #fed7aa 60%, #fed7aa 80%, 
+                  #fecaca 80%, #fecaca 100%)`
+              }}
+            />
+            <style jsx>{`
+              .stress-slider::-webkit-slider-thumb {
+                appearance: none;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                background: ${
+                  profileData.stressLevel <= 3 ? '#16a34a' :
+                  profileData.stressLevel <= 6 ? '#ca8a04' :
+                  profileData.stressLevel <= 8 ? '#ea580c' :
+                  '#dc2626'
+                };
+                cursor: pointer;
+                border: 2px solid white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              }
+              .stress-slider::-moz-range-thumb {
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                background: ${
+                  profileData.stressLevel <= 3 ? '#16a34a' :
+                  profileData.stressLevel <= 6 ? '#ca8a04' :
+                  profileData.stressLevel <= 8 ? '#ea580c' :
+                  '#dc2626'
+                };
+                cursor: pointer;
+                border: 2px solid white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              }
+            `}</style>
+          </div>
+          <div className="flex justify-between text-xs mt-2">
+            <span className="text-green-600 font-medium">😌 Low stress</span>
+            <span className="text-red-600 font-medium">😰 High stress</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Usual bedtime</label>
-            <input
-              type="time"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            <TimeSelector
               value={profileData.sleepSchedule.bedtime}
-              onChange={(e) => updateProfileData('sleepSchedule.bedtime', e.target.value)}
+              onChange={(time) => updateProfileData('sleepSchedule.bedtime', time)}
+              placeholder="Select bedtime"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Usual wake time</label>
-            <input
-              type="time"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            <TimeSelector
               value={profileData.sleepSchedule.wakeTime}
-              onChange={(e) => updateProfileData('sleepSchedule.wakeTime', e.target.value)}
+              onChange={(time) => updateProfileData('sleepSchedule.wakeTime', time)}
+              placeholder="Select wake time"
             />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">
-            Sleep quality: {profileData.sleepSchedule.sleepQuality}/10
+            Sleep quality: <span className={`font-bold ${
+              profileData.sleepSchedule.sleepQuality <= 3 ? 'text-red-600' :
+              profileData.sleepSchedule.sleepQuality <= 6 ? 'text-orange-600' :
+              profileData.sleepSchedule.sleepQuality <= 8 ? 'text-yellow-600' :
+              'text-green-600'
+            }`}>{profileData.sleepSchedule.sleepQuality}/10</span>
           </label>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            value={profileData.sleepSchedule.sleepQuality}
-            onChange={(e) => updateProfileData('sleepSchedule.sleepQuality', parseInt(e.target.value))}
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>Poor sleep</span>
-            <span>Excellent sleep</span>
+          <div className="relative">
+            <input
+              type="range"
+              min="1"
+              max="10"
+              className="w-full h-3 bg-gradient-to-r from-red-200 via-orange-200 via-yellow-200 to-green-200 rounded-lg appearance-none cursor-pointer sleep-slider"
+              value={profileData.sleepSchedule.sleepQuality}
+              onChange={(e) => updateProfileData('sleepSchedule.sleepQuality', parseInt(e.target.value))}
+              style={{
+                background: `linear-gradient(to right, 
+                  #fecaca 0%, #fecaca 30%, 
+                  #fed7aa 30%, #fed7aa 60%, 
+                  #fef3c7 60%, #fef3c7 80%, 
+                  #dcfce7 80%, #dcfce7 100%)`
+              }}
+            />
+            <style jsx>{`
+              .sleep-slider::-webkit-slider-thumb {
+                appearance: none;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                background: ${
+                  profileData.sleepSchedule.sleepQuality <= 3 ? '#dc2626' :
+                  profileData.sleepSchedule.sleepQuality <= 6 ? '#ea580c' :
+                  profileData.sleepSchedule.sleepQuality <= 8 ? '#ca8a04' :
+                  '#16a34a'
+                };
+                cursor: pointer;
+                border: 2px solid white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              }
+              .sleep-slider::-moz-range-thumb {
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                background: ${
+                  profileData.sleepSchedule.sleepQuality <= 3 ? '#dc2626' :
+                  profileData.sleepSchedule.sleepQuality <= 6 ? '#ea580c' :
+                  profileData.sleepSchedule.sleepQuality <= 8 ? '#ca8a04' :
+                  '#16a34a'
+                };
+                cursor: pointer;
+                border: 2px solid white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              }
+            `}</style>
+          </div>
+          <div className="flex justify-between text-xs mt-2">
+            <span className="text-red-600 font-medium">😴 Poor sleep</span>
+            <span className="text-green-600 font-medium">😊 Excellent sleep</span>
           </div>
         </div>
       </div>
