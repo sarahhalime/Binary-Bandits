@@ -5,6 +5,37 @@ from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__)
 
+# OPTIONS handlers for CORS preflight requests
+@auth_bp.route('/login', methods=['OPTIONS'])
+def login_options():
+    """Handle CORS preflight for login"""
+    return '', 200
+
+@auth_bp.route('/register', methods=['OPTIONS'])
+def register_options():
+    """Handle CORS preflight for register"""
+    return '', 200
+
+@auth_bp.route('/profile', methods=['OPTIONS'])
+def profile_options():
+    """Handle CORS preflight for profile"""
+    return '', 200
+
+@auth_bp.route('/onboarding', methods=['OPTIONS'])
+def onboarding_options():
+    """Handle CORS preflight for onboarding"""
+    return '', 200
+
+@auth_bp.route('/profile/photo', methods=['OPTIONS'])
+def profile_photo_options():
+    """Handle CORS preflight for profile photo"""
+    return '', 200
+
+@auth_bp.route('/friend-code', methods=['OPTIONS'])
+def friend_code_options():
+    """Handle CORS preflight for friend code"""
+    return '', 200
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     """Register a new user"""
