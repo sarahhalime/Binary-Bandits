@@ -43,6 +43,7 @@ def register():
         return jsonify({
             'message': 'User registered successfully',
             'access_token': access_token,
+            'token': access_token,  # For frontend compatibility
             'user': user.to_dict()
         }), 201
         
@@ -83,7 +84,8 @@ def login():
         
         return jsonify({
             'message': 'Login successful',
-            'token': access_token,
+            'access_token': access_token,
+            'token': access_token,  # For frontend compatibility
             'user': user.to_dict()
         }), 200
         
@@ -151,11 +153,35 @@ def get_friend_code():
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
+        # Debug logging
+        print(f"User found: {user.username}")
+        print(f"User friend_code: {getattr(user, 'friend_code', 'NOT_FOUND')}")
+        print(f"User dict: {user.__dict__}")
+        
+        # If friend_code is missing, generate one and save it
+        if not hasattr(user, 'friend_code') or not user.friend_code:
+            import secrets
+            import string
+            alphabet = string.ascii_uppercase + string.digits
+            user.friend_code = ''.join(secrets.choice(alphabet) for _ in range(8))
+            
+            # Save the friend code to database
+            from models.database import get_db
+            db = get_db()
+            if db is not None:
+                from bson import ObjectId
+                db.users.update_one(
+                    {"_id": ObjectId(user_id)},
+                    {"$set": {"friend_code": user.friend_code}}
+                )
+                print(f"Generated and saved new friend_code: {user.friend_code}")
+        
         return jsonify({
             'friend_code': user.friend_code
         }), 200
         
     except Exception as e:
+        print(f"Error in get_friend_code: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @auth_bp.route('/onboarding', methods=['POST'])
