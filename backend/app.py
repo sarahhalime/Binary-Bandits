@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from dotenv import load_dotenv
@@ -22,13 +22,23 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configuration
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'your-secret-key')
+# Production Configuration
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'fallback-secret-key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
-app.config['MONGODB_URI'] = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/mindful_harmony')
+app.config['MONGODB_URI'] = os.getenv('MONGODB_URI')
+
+# Environment-based CORS configuration
+FRONTEND_URLS = [
+    'http://localhost:3000',  # Local development
+    'http://localhost:3001',  # Alternative local
+    os.getenv('FRONTEND_URL', ''),  # Production frontend URL
+]
+
+# Filter out empty URLs
+FRONTEND_URLS = [url for url in FRONTEND_URLS if url]
 
 # Initialize extensions
-CORS(app, origins=['http://localhost:3000', 'http://localhost:3001'], supports_credentials=True)
+CORS(app, origins=FRONTEND_URLS, supports_credentials=True)
 jwt = JWTManager(app)
 
 # Initialize database
@@ -60,15 +70,7 @@ def not_found(error):
 def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
-# Serve React App
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    if path != "" and os.path.exists(os.path.join('static', path)):
-        return send_from_directory('static', path)
-    else:
-        return send_from_directory('static', 'index.html')
-
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5001))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    debug_mode = os.getenv('FLASK_ENV', 'production') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
