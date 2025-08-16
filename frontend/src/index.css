@@ -154,15 +154,7 @@
       radial-gradient(circle at 25% 25%, #ecfdf5 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, #fef3f2 0%, transparent 50%);
   }
-<<<<<<< HEAD
-
-  /* Vent Wall Specific Styles */
-  .vent-post {
-    @apply relative overflow-hidden transition-all duration-300 rounded-xl shadow-lg border border-white/30 p-6;
-    background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(248, 187, 217, 0.1));
-    backdrop-filter: blur(20px);
-=======
-
+  /* Dashboard Animation Utilities */
   .bounce-gentle {
     animation: bounce-gentle 3s ease-in-out infinite;
   }
@@ -182,6 +174,13 @@
     background-size: 400% 400%;
     animation: gradient-shift 3s ease infinite;
   }
+
+  /* Vent Wall Specific Styles */
+  .vent-post {
+    @apply relative overflow-hidden transition-all duration-300 rounded-xl shadow-lg border border-white/30 p-6;
+    background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(248, 187, 217, 0.1));
+    backdrop-filter: blur(20px);
+  }
 }
 
 @layer utilities {
@@ -191,7 +190,6 @@
   
   .text-shadow-lg {
     text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
->>>>>>> feature/dashboard
   }
   
   .vent-post:hover {
@@ -336,7 +334,6 @@
 }
 
 @keyframes float {
-<<<<<<< HEAD
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
 }
@@ -369,22 +366,6 @@
 @keyframes breathe {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
-=======
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.03);
-  }
 }
 
 @keyframes bounce-gentle {
@@ -421,7 +402,6 @@
   50% {
     background-position: 100% 50%;
   }
->>>>>>> feature/dashboard
 }
 
 /* Custom scrollbar */
