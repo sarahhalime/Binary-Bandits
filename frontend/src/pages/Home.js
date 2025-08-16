@@ -128,7 +128,8 @@ const Home = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8">
       {/* Welcome Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -139,8 +140,51 @@ const Home = () => {
           Welcome back, {user?.name}! 👋
         </h1>
         <p className="text-lg text-gray-600">
-          How are you feeling today?
         </p>
+      </motion.div>
+
+      {/* Quick Actions Centered */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 justify-items-center w-full max-w-4xl"
+      >
+        {quickActions.map((action, index) => {
+          const Icon = action.icon;
+          return (
+            <motion.div
+              key={action.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+              className={`card cursor-pointer group relative w-full flex items-center px-10 py-12 ${
+                action.isNew ? 'ring-2 ring-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50' : ''
+              }`}
+              onClick={() => window.location.href = action.path}
+            >
+              {action.isNew && (
+                <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                  NEW
+                </div>
+              )}
+              <div className="flex items-center w-full">
+                <div className={`w-12 h-12 bg-${action.color}-100 rounded-lg flex items-center justify-center mr-6 group-hover:bg-${action.color}-200 transition-colors`}>
+                  <Icon className={`text-${action.color}-600`} size={28} />
+                </div>
+                <div className="flex flex-col items-start w-full">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {action.title}
+                  </h3>
+                  <p className="text-gray-600">
+                    {action.description}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {/* Current Mood Display */}
@@ -165,88 +209,6 @@ const Home = () => {
           </div>
         </motion.div>
       )}
-
-      {/* Mood Selection */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="card mb-8"
-      >
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          How are you feeling right now?
-        </h2>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {moods.map((mood, index) => (
-            <motion.button
-              key={mood.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleMoodSubmit(mood.name)}
-              disabled={submittingMood}
-              className={`mood-card ${mood.color} p-4 text-center transition-all duration-300 ${
-                submittingMood ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <div className="text-3xl mb-2">{mood.emoji}</div>
-              <div className="font-medium text-gray-700 capitalize">
-                {mood.name}
-              </div>
-            </motion.button>
-          ))}
-        </div>
-
-        {submittingMood && (
-          <div className="text-center mt-4">
-            <div className="spinner inline-block"></div>
-            <p className="text-gray-600 mt-2">Recording your mood...</p>
-          </div>
-        )}
-      </motion.div>
-
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-      >
-        {quickActions.map((action, index) => {
-          const Icon = action.icon;
-          return (
-            <motion.div
-              key={action.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              className={`card cursor-pointer group relative ${
-                action.isNew ? 'ring-2 ring-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50' : ''
-              }`}
-              onClick={() => window.location.href = action.path}
-            >
-              {action.isNew && (
-                <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                  NEW
-                </div>
-              )}
-              <div className={`w-12 h-12 bg-${action.color}-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-${action.color}-200 transition-colors`}>
-                <Icon className={`text-${action.color}-600`} size={24} />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                {action.title}
-              </h3>
-              <p className="text-gray-600">
-                {action.description}
-              </p>
-            </motion.div>
-          );
-        })}
-      </motion.div>
 
       {/* Insights */}
       {insights.length > 0 && (
