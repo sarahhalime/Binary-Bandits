@@ -1,0 +1,13 @@
+{
+  "name": "mindful-harmony",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd backend && python app.py",
+    "install-backend": "cd backend && pip install -r requirements.txt"
+  },
+  "engines": {
+    "node": "18.x",
+    "python": "3.x"
+  }
+}
