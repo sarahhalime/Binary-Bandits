@@ -55,6 +55,9 @@ export const authAPI = {
   
   completeOnboarding: (profileData) => 
     api.post('/auth/onboarding', profileData).then(res => res.data),
+  
+  updateProfilePhoto: (photoData) => 
+    api.post('/auth/profile/photo', { profilePhoto: photoData }).then(res => res.data),
 };
 
 // Mood API

@@ -4,12 +4,14 @@ import { authAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import PhotoUploadModal from './PhotoUploadModal';
 
 const OnboardingFlow = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [profileData, setProfileData] = useState({
     // Basic Info
     name: user?.name || '',
@@ -79,15 +81,16 @@ const OnboardingFlow = () => {
     }));
   };
 
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        updateProfileData('profilePhoto', e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleOpenPhotoModal = () => {
+    setIsPhotoModalOpen(true);
+  };
+
+  const handleClosePhotoModal = () => {
+    setIsPhotoModalOpen(false);
+  };
+
+  const handlePhotoSave = (photoData) => {
+    updateProfileData('profilePhoto', photoData);
   };
 
   const nextStep = () => {
@@ -161,11 +164,14 @@ const OnboardingFlow = () => {
                 <User className="text-gray-400" size={24} />
               </div>
             )}
-            <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+            <button
+              type="button"
+              onClick={handleOpenPhotoModal}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
               <Upload size={16} className="inline mr-2" />
               Upload Photo
-              <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
-            </label>
+            </button>
           </div>
         </div>
 
@@ -665,6 +671,14 @@ const OnboardingFlow = () => {
           </div>
         </div>
       </div>
+
+      {/* Photo Upload Modal */}
+      <PhotoUploadModal
+        isOpen={isPhotoModalOpen}
+        onClose={handleClosePhotoModal}
+        currentPhoto={profileData.profilePhoto}
+        onSave={handlePhotoSave}
+      />
     </div>
   );
 };

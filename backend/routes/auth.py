@@ -201,9 +201,29 @@ def complete_onboarding():
             'onboarding_completed': True
         }
         
-        # Update profile photo if provided
+        # Update profile photo if provided with validation
         if data.get('profilePhoto'):
-            user.profile_pic = data.get('profilePhoto')
+            profile_photo = data.get('profilePhoto')
+            
+            # Validate base64 image data
+            if not profile_photo.startswith('data:image/'):
+                return jsonify({'error': 'Invalid image format'}), 400
+            
+            # Check if it's an allowed image type
+            allowed_formats = ['data:image/jpeg', 'data:image/jpg', 'data:image/png', 'data:image/webp']
+            if not any(profile_photo.startswith(fmt) for fmt in allowed_formats):
+                return jsonify({'error': 'Only JPG, PNG, and WebP images are allowed'}), 400
+            
+            # Estimate base64 size (base64 is ~1.37x larger than original)
+            # Remove data URL prefix to get just the base64 data
+            base64_data = profile_photo.split(',')[1] if ',' in profile_photo else profile_photo
+            estimated_size = len(base64_data) * 0.75  # Convert base64 length to estimated bytes
+            max_size = 2 * 1024 * 1024  # 2MB
+            
+            if estimated_size > max_size:
+                return jsonify({'error': 'Image size must be less than 2MB'}), 400
+            
+            user.profile_pic = profile_photo
         
         # Update name if provided
         if data.get('name'):
@@ -219,6 +239,64 @@ def complete_onboarding():
             }), 200
         else:
             return jsonify({'error': 'Failed to update profile data'}), 500
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/profile/photo', methods=['POST'])
+@jwt_required()
+def update_profile_photo():
+    """Update user profile photo immediately"""
+    try:
+        user_id = get_jwt_identity()
+        user = User.find_by_id(user_id)
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        data = request.get_json()
+        profile_photo = data.get('profilePhoto')
+        
+        if not profile_photo:
+            return jsonify({'error': 'No photo provided'}), 400
+        
+        # Validate base64 image data
+        if not profile_photo.startswith('data:image/'):
+            return jsonify({'error': 'Invalid image format'}), 400
+        
+        # Check if it's an allowed image type
+        allowed_formats = ['data:image/jpeg', 'data:image/jpg', 'data:image/png', 'data:image/webp']
+        if not any(profile_photo.startswith(fmt) for fmt in allowed_formats):
+            return jsonify({'error': 'Only JPG, PNG, and WebP images are allowed'}), 400
+        
+        # Estimate base64 size (base64 is ~1.37x larger than original)
+        base64_data = profile_photo.split(',')[1] if ',' in profile_photo else profile_photo
+        estimated_size = len(base64_data) * 0.75  # Convert base64 length to estimated bytes
+        max_size = 2 * 1024 * 1024  # 2MB
+        
+        if estimated_size > max_size:
+            return jsonify({'error': 'Image size must be less than 2MB'}), 400
+        
+        # Update user profile photo
+        user.profile_pic = profile_photo
+        
+        # Save to database
+        from models.database import get_db
+        db = get_db()
+        users_collection = db.users
+        
+        result = users_collection.update_one(
+            {'_id': user._id},
+            {'$set': {'profile_pic': profile_photo}}
+        )
+        
+        if result.modified_count > 0:
+            return jsonify({
+                'message': 'Profile photo updated successfully',
+                'user': user.to_dict()
+            }), 200
+        else:
+            return jsonify({'error': 'Failed to update profile photo'}), 500
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
