@@ -169,13 +169,10 @@ const Home = () => {
   }
 
   return (
-<<<<<<< HEAD
 // ...existing code...
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Welcome Section */}
 // ...existing code...
-=======
->>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
     <div className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 relative overflow-hidden" style={{ background: 'radial-gradient(ellipse at top left, #5a2ea6 0%, #8e44ad 40%, #d76d77 70%, #ffaf7b 100%)' }}>
 
       
@@ -209,7 +206,6 @@ const Home = () => {
           filter: 'blur(32px)',
         }} />
         {/* Animated stars */}
-<<<<<<< HEAD
           {[...Array(80)].map((_, i) => {
             const duration = Math.random() * 2 + 1;
             const delay = Math.random() * 2;
@@ -233,26 +229,6 @@ const Home = () => {
               />
             );
           })}
-=======
-        {[...Array(80)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 2 + 1}px`,
-              height: `${Math.random() * 2 + 1}px`,
-              borderRadius: '50%',
-              background: 'white',
-              opacity: Math.random() * 0.6 + 0.2,
-              filter: 'blur(0.7px)',
-              zIndex: 0,
-              animation: `twinkle ${Math.random() * 2 + 1}s infinite alternate`,
-            }}
-          />
-        ))}
->>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
       </div>
       {/* Galaxy nebula glows */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -305,7 +281,6 @@ const Home = () => {
       </div>
       <style>{`
         @keyframes twinkle {
-<<<<<<< HEAD
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
         }
@@ -348,17 +323,12 @@ const Home = () => {
           20% { opacity: 1; }
           80% { opacity: 1; }
           100% { opacity: 0; transform: scale(1.2) translateY(-30px); }
-=======
-          from { opacity: 0.3; }
-          to { opacity: 1; }
->>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
         }
       `}</style>
       {/* Shooting Star Animation Above Welcome */}
       {/* Shooting star flies fully across, tail visible and fading, sprinkle dust at far right edge */}
       {/** Only render the SVG while the animation is running */}
       {showStar && (
-<<<<<<< HEAD
         <div style={{ position: 'absolute', left: 0, top: '30px', width: '100vw', height: '60px', pointerEvents: 'none', zIndex: 30 }}>
           <svg style={{ width: '100vw', height: '60px', overflow: 'visible', position: 'absolute', left: 0, top: 0 }}>
             <g id="shootingStarGroup">
@@ -380,39 +350,12 @@ const Home = () => {
             </g>
             <defs>
               <linearGradient id="tailGradient" x1="0" y1="30" x2="1200" y2="20" gradientUnits="userSpaceOnUse">
-=======
-        <div style={{ position: 'absolute', left: 0, top: '90px', width: '100vw', height: '80px', pointerEvents: 'none', zIndex: 30 }}>
-          <svg style={{ width: '100vw', height: '80px', overflow: 'visible', position: 'absolute', left: 0, top: 0 }}>
-            <g id="shootingStarGroup">
-              {/* Tail - visible, trailing, fading out (shorter tail) */}
-              <path id="tail" d="M 0 60 Q 400 20, 1200 40" stroke="url(#tailGradient)" strokeWidth="12" fill="none" opacity="0.7" filter="url(#tailBlur)" />
-              {/* Star Head - glowing circle with starburst */}
-              <g id="starHead">
-                <circle cx="1200" cy="40" r="24" fill="url(#starGlow)" filter="url(#glow)" />
-                {/* Starburst */}
-                <g>
-                  <line x1="1200" y1="22" x2="1200" y2="58" stroke="#fff8b0" strokeWidth="3" opacity="0.7" />
-                  <line x1="1182" y1="40" x2="1218" y2="40" stroke="#fff8b0" strokeWidth="3" opacity="0.7" />
-                  <line x1="1190" y1="28" x2="1210" y2="52" stroke="#fff8b0" strokeWidth="2" opacity="0.5" />
-                  <line x1="1210" y1="28" x2="1190" y2="52" stroke="#fff8b0" strokeWidth="2" opacity="0.5" />
-                </g>
-                {/* Sparkle */}
-                <circle cx="1200" cy="40" r="5" fill="#fff" opacity="0.9" />
-              </g>
-            </g>
-            <defs>
-              <linearGradient id="tailGradient" x1="0" y1="60" x2="1200" y2="40" gradientUnits="userSpaceOnUse">
->>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
                 <stop stopColor="#fff8b0" />
                 <stop offset="0.3" stopColor="#FFD700" />
                 <stop offset="0.7" stopColor="#FFA500" />
                 <stop offset="1" stopColor="rgba(255,255,255,0)" />
               </linearGradient>
-<<<<<<< HEAD
               <radialGradient id="starGlow" cx="1200" cy="20" r="24" gradientUnits="userSpaceOnUse">
-=======
-              <radialGradient id="starGlow" cx="1200" cy="40" r="24" gradientUnits="userSpaceOnUse">
->>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
                 <stop offset="0%" stopColor="#fff8b0" stopOpacity="1" />
                 <stop offset="60%" stopColor="#FFD700" stopOpacity="0.7" />
                 <stop offset="100%" stopColor="#FFA500" stopOpacity="0" />
@@ -449,20 +392,13 @@ const Home = () => {
             }
             #shootingStarGroup {
               transform-box: fill-box;
-<<<<<<< HEAD
               transform-origin: 0px 30px;
-=======
-              transform-origin: 0px 60px;
->>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
               animation: moveStarGroup 5.2s cubic-bezier(0.4,0,0.2,1) 1;
             }
           `}</style>
         </div>
       )}
-<<<<<<< HEAD
 // ...existing code...
-=======
->>>>>>> 56713678596f2da350c421a604f492dbf3bf5c6e
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -471,12 +407,8 @@ const Home = () => {
         <h1 className="text-4xl font-bold mb-2" style={{ color: '#111', position: 'relative', zIndex: 20 }}>
           Welcome back, {user?.name}! <span role="img" aria-label="wave">👋</span>
         </h1>
-<<<<<<< Updated upstream
         <p className="text-lg text-gray-600">
         </p>
-=======
-  {/* Removed empty textbox under welcome message */}
->>>>>>> Stashed changes
       </motion.div>
       <style>{`
         .flying-star {
