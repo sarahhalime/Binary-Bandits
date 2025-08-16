@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Heart, User, Mail, Lock } from 'lucide-react';
-import AnimatedBackground from '../components/AnimatedBackground.tsx';
+import AnimatedBackground from '../components/AnimatedBackground.js';
 
 const Register = () => {
   // Track keystrokes for bubble animation
