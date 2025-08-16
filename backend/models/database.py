@@ -86,6 +86,10 @@ def create_indexes():
     db.vent_comments.create_index([("is_active", 1), ("timestamp", 1)])
     db.vent_comments.create_index([("user_id", 1), ("timestamp", -1)])
     
+    # Spotify tokens indexes
+    db.spotify_tokens.create_index([("user_id", 1)], unique=True)
+    db.spotify_tokens.create_index([("updated_at", -1)])
+    
     print("✅ Database indexes created successfully")
 
 def get_db():

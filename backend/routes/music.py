@@ -1,9 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, redirect, session
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.database import get_db
 from services.spotify_service import SpotifyService
 from datetime import datetime
 from bson import ObjectId
+import secrets
 
 music_bp = Blueprint('music', __name__)
 
@@ -55,6 +56,210 @@ def generate_mood_playlist():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@music_bp.route('/spotify/auth', methods=['GET'])
+@jwt_required()
+def spotify_auth():
+    """Initiate Spotify OAuth"""
+    try:
+        user_id = get_jwt_identity()
+        
+        # Generate state for security
+        state = secrets.token_urlsafe(32)
+        
+        # Store state in session or database (for demo, we'll use a simple approach)
+        auth_url = spotify_service.get_oauth_url(state=f"{state}:{user_id}")
+        
+        if not auth_url:
+            return jsonify({'error': 'Spotify authentication not available'}), 500
+        
+        return jsonify({
+            'auth_url': auth_url,
+            'state': state
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@music_bp.route('/spotify/callback', methods=['GET'])
+def spotify_callback():
+    """Handle Spotify OAuth callback"""
+    try:
+        code = request.args.get('code')
+        state = request.args.get('state')
+        error = request.args.get('error')
+        
+        if error:
+            return redirect(f'http://localhost:3000/music?error={error}')
+        
+        if not code or not state:
+            return redirect('http://localhost:3000/music?error=missing_parameters')
+        
+        # Extract user_id from state
+        try:
+            state_token, user_id = state.split(':', 1)
+        except ValueError:
+            return redirect('http://localhost:3000/music?error=invalid_state')
+        
+        # Get access token
+        token_info = spotify_service.handle_oauth_callback(code, state)
+        
+        if not token_info:
+            return redirect('http://localhost:3000/music?error=token_error')
+        
+        # Store token in database
+        db = get_db()
+        if db is not None:
+            db.spotify_tokens.update_one(
+                {'user_id': ObjectId(user_id)},
+                {
+                    '$set': {
+                        'access_token': token_info['access_token'],
+                        'refresh_token': token_info['refresh_token'],
+                        'expires_at': token_info['expires_at'],
+                        'updated_at': datetime.utcnow()
+                    }
+                },
+                upsert=True
+            )
+        
+        return redirect('http://localhost:3000/music?success=spotify_connected')
+        
+    except Exception as e:
+        print(f"Callback error: {e}")
+        return redirect(f'http://localhost:3000/music?error=callback_error')
+
+@music_bp.route('/create-spotify-playlist', methods=['POST'])
+@jwt_required()
+def create_spotify_playlist():
+    """Create a playlist in user's Spotify account"""
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        
+        print(f"Creating Spotify playlist for user: {user_id}")
+        print(f"Request data: {data}")
+        
+        # Validate required fields
+        if not data.get('mood'):
+            return jsonify({'error': 'Mood is required'}), 400
+        
+        mood = data['mood'].lower()
+        intensity = data.get('intensity', 5)
+        limit = data.get('limit', 20)
+        
+        print(f"Mood: {mood}, Intensity: {intensity}, Limit: {limit}")
+        
+        # Check if Spotify service is available
+        if not spotify_service.spotify_available:
+            # Demo mode - simulate successful playlist creation
+            demo_playlist = {
+                'success': True,
+                'playlist_id': 'demo_spotify_playlist',
+                'playlist_url': 'https://open.spotify.com/playlist/demo',
+                'playlist_name': f"My {mood.title()} Mood Playlist - Demo",
+                'tracks_added': 15
+            }
+            
+            return jsonify({
+                'message': 'Demo Spotify playlist created successfully!',
+                'playlist': {
+                    'id': 'demo_playlist_id',
+                    'spotify_id': demo_playlist['playlist_id'],
+                    'name': demo_playlist['playlist_name'],
+                    'url': demo_playlist['playlist_url'],
+                    'tracks_added': demo_playlist['tracks_added'],
+                    'mood': mood,
+                    'intensity': intensity
+                }
+            }), 201
+        
+        # Get user's Spotify token
+        db = get_db()
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
+        
+        try:
+            token_doc = db.spotify_tokens.find_one({'user_id': ObjectId(user_id)})
+            print(f"Token document found: {token_doc is not None}")
+        except Exception as e:
+            print(f"Database query error: {e}")
+            return jsonify({'error': f'Database query failed: {str(e)}'}), 500
+        
+        if not token_doc:
+            return jsonify({'error': 'Spotify not connected. Please authenticate first.'}), 401
+        
+        access_token = token_doc['access_token']
+        
+        # Check if token is expired and refresh if needed
+        if datetime.utcnow().timestamp() >= token_doc['expires_at']:
+            refresh_token = token_doc['refresh_token']
+            new_token_info = spotify_service.refresh_token(refresh_token)
+            
+            if not new_token_info:
+                return jsonify({'error': 'Failed to refresh Spotify token. Please re-authenticate.'}), 401
+            
+            # Update token in database
+            db.spotify_tokens.update_one(
+                {'user_id': ObjectId(user_id)},
+                {
+                    '$set': {
+                        'access_token': new_token_info['access_token'],
+                        'expires_at': new_token_info['expires_at'],
+                        'updated_at': datetime.utcnow()
+                    }
+                }
+            )
+            access_token = new_token_info['access_token']
+        
+        # Generate playlist tracks using user's access token
+        playlist_data = spotify_service.generate_mood_playlist(mood, intensity, limit, access_token)
+        tracks = playlist_data.get('tracks', [])
+        print(f"Debug - Generated {len(tracks)} tracks from mood playlist")
+        for i, track in enumerate(tracks[:3]):  # Show first 3 tracks
+            print(f"Debug - Generated track {i}: {track.get('name')} by {track.get('artist')} (ID: {track.get('id')})")
+        
+        # Create playlist in Spotify
+        result = spotify_service.create_spotify_playlist(access_token, mood, intensity, tracks)
+        
+        if not result['success']:
+            return jsonify({'error': f"Failed to create Spotify playlist: {result['error']}"}), 500
+        
+        # Save playlist info to database
+        playlist_entry = {
+            'user_id': ObjectId(user_id),
+            'mood': mood,
+            'intensity': intensity,
+            'spotify_playlist_id': result['playlist_id'],
+            'spotify_playlist_url': result['playlist_url'],
+            'playlist_name': result['playlist_name'],
+            'tracks': tracks,
+            'tracks_count': result['tracks_added'],
+            'timestamp': datetime.utcnow(),
+            'created_in_spotify': True
+        }
+        
+        db_result = db.playlists.insert_one(playlist_entry)
+        
+        return jsonify({
+            'message': 'Spotify playlist created successfully!',
+            'playlist': {
+                'id': str(db_result.inserted_id),
+                'spotify_id': result['playlist_id'],
+                'name': result['playlist_name'],
+                'url': result['playlist_url'],
+                'tracks_added': result['tracks_added'],
+                'mood': mood,
+                'intensity': intensity
+            }
+        }), 201
+        
+    except Exception as e:
+        print(f"Create playlist error: {e}")
+        print(f"Error type: {type(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
 @music_bp.route('/playlists', methods=['GET'])
 @jwt_required()
@@ -140,6 +345,12 @@ def get_user_playlists():
         for playlist in playlists:
             playlist['id'] = str(playlist['_id'])
             playlist['timestamp'] = playlist['timestamp'].isoformat()
+            # Convert user_id ObjectId to string if present
+            if 'user_id' in playlist:
+                playlist['user_id'] = str(playlist['user_id'])
+            # Convert any other ObjectIds that might be present
+            if 'mood_entry_id' in playlist:
+                playlist['mood_entry_id'] = str(playlist['mood_entry_id'])
             del playlist['_id']
         
         # Get total count
@@ -156,7 +367,11 @@ def get_user_playlists():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Get playlists error: {e}")
+        print(f"Error type: {type(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to get playlists: {str(e)}'}), 500
 
 @music_bp.route('/playlist/<playlist_id>', methods=['GET'])
 @jwt_required()

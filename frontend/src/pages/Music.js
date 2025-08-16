@@ -8,7 +8,9 @@ import {
   Search, 
   Filter,
   ExternalLink,
-  Loader2
+  Loader2,
+  Link as LinkIcon,
+  CheckCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -16,9 +18,11 @@ const Music = () => {
   const [playlists, setPlaylists] = useState([]);
   const [currentPlaylist, setCurrentPlaylist] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [spotifyLoading, setSpotifyLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMood, setSelectedMood] = useState('');
   const [intensity, setIntensity] = useState(5);
+  const [spotifyPlaylist, setSpotifyPlaylist] = useState(null);
 
   const moods = [
     { name: 'happy', emoji: '😊', color: 'warm' },
@@ -31,6 +35,17 @@ const Music = () => {
 
   useEffect(() => {
     loadPlaylists();
+    
+    // Check for Spotify auth success/error in URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'spotify_connected') {
+      toast.success('Successfully connected to Spotify!');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('error')) {
+      toast.error('Failed to connect to Spotify. Please try again.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const loadPlaylists = async () => {
@@ -65,6 +80,50 @@ const Music = () => {
       toast.error('Failed to generate playlist. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createSpotifyPlaylist = async () => {
+    if (!selectedMood) {
+      toast.error('Please select a mood first');
+      return;
+    }
+
+    setSpotifyLoading(true);
+    try {
+      const response = await musicAPI.createSpotifyPlaylist({
+        mood: selectedMood,
+        intensity: intensity,
+        limit: 20
+      });
+
+      setSpotifyPlaylist(response.playlist);
+      toast.success(
+        <div>
+          <div className="font-medium">Spotify playlist created!</div>
+          <div className="text-sm text-gray-600">{response.playlist.name}</div>
+        </div>
+      );
+      
+      // Reload playlists
+      loadPlaylists();
+    } catch (error) {
+      console.error('Spotify playlist error:', error);
+      
+      if (error.response?.status === 401) {
+        // Need to authenticate with Spotify
+        try {
+          const authResponse = await musicAPI.getSpotifyAuth();
+          window.open(authResponse.auth_url, '_blank');
+          toast.info('Please complete Spotify authentication and try again');
+        } catch (authError) {
+          toast.error('Failed to initiate Spotify authentication');
+        }
+      } else {
+        toast.error('Failed to create Spotify playlist. Please try again.');
+      }
+    } finally {
+      setSpotifyLoading(false);
     }
   };
 
@@ -166,28 +225,52 @@ const Music = () => {
           </div>
         </div>
 
-        {/* Generate Button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={generatePlaylist}
-          disabled={loading || !selectedMood}
-          className={`mt-6 w-full btn-primary py-3 text-lg font-medium ${
-            loading || !selectedMood ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center">
-              <Loader2 className="animate-spin mr-2" size={20} />
-              Generating playlist...
-            </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <Play className="mr-2" size={20} />
-              Generate Playlist
-            </div>
-          )}
-        </motion.button>
+        {/* Generate Buttons */}
+        <div className="mt-6 grid md:grid-cols-2 gap-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={generatePlaylist}
+            disabled={loading || !selectedMood}
+            className={`btn-secondary py-3 text-lg font-medium ${
+              loading || !selectedMood ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <Loader2 className="animate-spin mr-2" size={20} />
+                Generating...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <Play className="mr-2" size={20} />
+                Preview Playlist
+              </div>
+            )}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={createSpotifyPlaylist}
+            disabled={spotifyLoading || !selectedMood}
+            className={`btn-primary py-3 text-lg font-medium ${
+              spotifyLoading || !selectedMood ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {spotifyLoading ? (
+              <div className="flex items-center justify-center">
+                <Loader2 className="animate-spin mr-2" size={20} />
+                Creating in Spotify...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <LinkIcon className="mr-2" size={20} />
+                Create in Spotify
+              </div>
+            )}
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Current Playlist */}
@@ -240,6 +323,66 @@ const Music = () => {
                 </div>
               </motion.div>
             ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Spotify Playlist Success */}
+      {spotifyPlaylist && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="card mb-8 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <CheckCircle className="text-green-600 mr-3" size={32} />
+              <div>
+                <h2 className="text-xl font-bold text-green-800">
+                  Spotify Playlist Created! 🎉
+                </h2>
+                <p className="text-green-700">{spotifyPlaylist.name}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white/60 rounded-lg p-4 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-green-800">{spotifyPlaylist.tracks_added}</div>
+                <div className="text-sm text-green-600">Tracks Added</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-800 capitalize">{spotifyPlaylist.mood}</div>
+                <div className="text-sm text-green-600">Mood</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-800">{spotifyPlaylist.intensity}/10</div>
+                <div className="text-sm text-green-600">Intensity</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-800">Private</div>
+                <div className="text-sm text-green-600">Visibility</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a
+              href={spotifyPlaylist.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary flex items-center justify-center py-3 flex-1"
+            >
+              <ExternalLink className="mr-2" size={20} />
+              Open in Spotify
+            </a>
+            <button
+              onClick={() => setSpotifyPlaylist(null)}
+              className="btn-secondary flex items-center justify-center py-3 sm:w-auto"
+            >
+              Create Another
+            </button>
           </div>
         </motion.div>
       )}

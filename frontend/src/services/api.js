@@ -29,8 +29,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Don't redirect to login for Spotify-related auth errors
+      const isSpotifyEndpoint = error.config?.url?.includes('/music/spotify') || 
+                                error.config?.url?.includes('/music/create-spotify-playlist');
+      
+      if (!isSpotifyEndpoint) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -178,6 +184,12 @@ export const socialAPI = {
 export const musicAPI = {
   generatePlaylist: (moodData) => 
     api.post('/music/generate', moodData).then(res => res.data),
+  
+  createSpotifyPlaylist: (moodData) => 
+    api.post('/music/create-spotify-playlist', moodData).then(res => res.data),
+  
+  getSpotifyAuth: () => 
+    api.get('/music/spotify/auth').then(res => res.data),
   
   getPlaylists: (params = {}) => 
     api.get('/music/playlists', { params }).then(res => res.data),
