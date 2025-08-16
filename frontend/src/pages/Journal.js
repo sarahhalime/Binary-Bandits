@@ -36,9 +36,13 @@ const Journal = () => {
   const loadEntries = async () => {
     try {
       const response = await journalAPI.getEntries();
-      setEntries(response.entries || []);
+      // Handle both array and object responses
+      const entriesData = Array.isArray(response) ? response : (response.entries || []);
+      setEntries(entriesData);
     } catch (error) {
       console.error('Error loading entries:', error);
+      // Set empty array on error to prevent rendering issues
+      setEntries([]);
     }
   };
 
@@ -74,9 +78,27 @@ const Journal = () => {
     setAiLoading(true);
     try {
       const response = await journalAPI.getAIResponse(currentEntry, selectedMood);
-      setAiResponse(response.ai_response);
+      // Handle different response formats
+      let responseText = '';
+      if (typeof response === 'string') {
+        responseText = response;
+      } else if (response && typeof response === 'object') {
+        // Handle AI service response object
+        if (response.ai_response && typeof response.ai_response === 'object') {
+          // If ai_response is an object, extract the response field
+          responseText = response.ai_response.response || response.ai_response.reply || JSON.stringify(response.ai_response);
+        } else {
+          // If ai_response is a string or response is directly in the object
+          responseText = response.ai_response || response.response || response.reply || JSON.stringify(response);
+        }
+      } else {
+        responseText = 'AI response received';
+      }
+      setAiResponse(responseText);
     } catch (error) {
+      console.error('AI Response Error:', error);
       toast.error('Failed to get AI response. Please try again.');
+      setAiResponse('');
     } finally {
       setAiLoading(false);
     }
@@ -99,8 +121,8 @@ const Journal = () => {
         </p>
       </motion.div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Write Entry */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Journal Entry Form */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -108,29 +130,29 @@ const Journal = () => {
         >
           <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
             <Plus className="mr-2 text-primary-600" size={24} />
-            Write New Entry
+            New Entry
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Mood Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                How are you feeling? (Optional)
+                How are you feeling?
               </label>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 {moods.map((mood) => (
                   <button
                     key={mood.name}
                     type="button"
                     onClick={() => setSelectedMood(mood.name)}
-                    className={`p-3 rounded-lg border-2 transition-all duration-200 text-center ${
+                    className={`p-3 rounded-lg border-2 transition-all ${
                       selectedMood === mood.name
                         ? 'border-primary-500 bg-primary-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-gray-200 hover:border-primary-300'
                     }`}
                   >
-                    <div className="text-xl">{mood.emoji}</div>
-                    <div className="text-xs font-medium text-gray-700 capitalize mt-1">
+                    <div className="text-2xl mb-1">{mood.emoji}</div>
+                    <div className="text-sm font-medium capitalize text-gray-700">
                       {mood.name}
                     </div>
                   </button>
@@ -138,7 +160,7 @@ const Journal = () => {
               </div>
             </div>
 
-            {/* Journal Entry */}
+            {/* Journal Content */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 What's on your mind?
@@ -146,9 +168,9 @@ const Journal = () => {
               <textarea
                 value={currentEntry}
                 onChange={(e) => setCurrentEntry(e.target.value)}
-                placeholder="Write about your day, feelings, thoughts, or anything you'd like to share..."
+                placeholder="Write your thoughts, feelings, or anything you'd like to share..."
                 className="input-field min-h-[200px] resize-none"
-                rows={8}
+                required
               />
             </div>
 
@@ -156,23 +178,20 @@ const Journal = () => {
             <div className="flex space-x-4">
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 disabled={loading || !currentEntry.trim()}
                 className={`btn-primary flex-1 ${
                   loading || !currentEntry.trim() ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
+                <Send className="mr-2" size={16} />
                 {loading ? 'Saving...' : 'Save Entry'}
               </motion.button>
 
               <motion.button
                 type="button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={getAIResponse}
                 disabled={aiLoading || !currentEntry.trim()}
-                className={`btn-secondary ${
+                className={`btn-calm ${
                   aiLoading || !currentEntry.trim() ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
@@ -227,7 +246,7 @@ const Journal = () => {
           <div className="space-y-4">
             {entries.slice(0, 5).map((entry, index) => (
               <motion.div
-                key={entry.id}
+                key={entry.id || index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + index * 0.1 }}
@@ -259,8 +278,8 @@ const Journal = () => {
                 </p>
                 
                 <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-                  <span>{entry.word_count} words</span>
-                  <span>{new Date(entry.timestamp).toLocaleDateString()}</span>
+                  <span>{entry.word_count || entry.content?.split(' ').length || 0} words</span>
+                  <span>{new Date(entry.timestamp || entry.created_at || Date.now()).toLocaleDateString()}</span>
                 </div>
               </motion.div>
             ))}
