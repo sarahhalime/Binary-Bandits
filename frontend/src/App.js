@@ -11,7 +11,7 @@ import Journal from './pages/Journal';
 import Activities from './pages/Activities';
 import Social from './pages/Social';
 import Profile from './pages/Profile';
-import Dashboard from './pages/Dashboard.tsx';
+import Dashboard from './pages/Dashboard';
 import './index.css';
 
 // Protected Route Component
@@ -48,7 +48,7 @@ function AppContent() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-calm-50 to-primary-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {user && <Navbar />}
       <main className={user ? 'pt-16' : ''}>
         <Routes>
@@ -113,7 +113,7 @@ function AppContent() {
           },
           success: {
             iconTheme: {
-              primary: '#14b8a6',
+              primary: '#6366f1',
               secondary: '#ffffff',
             },
           },
