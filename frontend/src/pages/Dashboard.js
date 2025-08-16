@@ -22,14 +22,7 @@ import FloatingActionButton from '../components/FloatingActionButton';
 
 const Dashboard = () => {
   const featureCards = [
-    {
-      title: "Mood Tracker",
-      description: "Track your daily emotions and see patterns over time",
-      icon: Heart,
-      path: "/",
-      gradient: "from-pink-500 to-rose-500",
-      iconColor: "text-pink-500"
-    },
+  // Removed Mood Tracker card from Dashboard
     {
       title: "Journal",
       description: "Write your thoughts and get AI-powered insights",
@@ -46,30 +39,9 @@ const Dashboard = () => {
       gradient: "from-purple-500 to-violet-500",
       iconColor: "text-purple-500"
     },
-    {
-      title: "Activities",
-      description: "Find mindful activities to boost your mood",
-      icon: Activity,
-      path: "/activities",
-      gradient: "from-emerald-500 to-teal-500",
-      iconColor: "text-emerald-500"
-    },
-    {
-      title: "Social",
-      description: "Connect with friends and share your journey",
-      icon: Users,
-      path: "/social",
-      gradient: "from-orange-500 to-amber-500",
-      iconColor: "text-orange-500"
-    },
-    {
-      title: "Profile",
-      description: "View your progress and customize your experience",
-      icon: User,
-      path: "/profile",
-      gradient: "from-slate-500 to-gray-500",
-      iconColor: "text-slate-500"
-    }
+  // Removed Activities card from Dashboard
+  // Removed Social card from Dashboard
+  // Removed Profile card from Dashboard
   ];
 
   const achievements = [
@@ -164,11 +136,19 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="relative z-10">
         {/* Welcome Header */}
+// ...existing code...
         <WelcomeHeader />
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-6 pb-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+// ...existing code...
+            <WelcomeHeader />
+            {/* Main Content */}
+            <div className="max-w-7xl mx-auto px-6 pb-12">
+              {/* Mood selector and current mood card only on Home.js */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+// ...existing code...
             {/* Left Column - Features */}
             <div className="lg:col-span-2">
               <motion.div
