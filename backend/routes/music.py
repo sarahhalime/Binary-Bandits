@@ -83,8 +83,51 @@ def spotify_auth():
 
 @music_bp.route('/spotify/callback', methods=['GET'])
 def spotify_callback():
-    """Handle Spotify OAuth callback - this won't be used with the new redirect setup"""
-    return jsonify({'message': 'This endpoint is not used with external redirect'}), 200
+    """Handle Spotify OAuth callback"""
+    try:
+        code = request.args.get('code')
+        state = request.args.get('state')
+        error = request.args.get('error')
+        
+        if error:
+            return redirect(f'http://localhost:3000/music?error={error}')
+        
+        if not code or not state:
+            return redirect('http://localhost:3000/music?error=missing_parameters')
+        
+        # Extract user_id from state
+        try:
+            state_token, user_id = state.split(':', 1)
+        except ValueError:
+            return redirect('http://localhost:3000/music?error=invalid_state')
+        
+        # Get access token
+        token_info = spotify_service.handle_oauth_callback(code, state)
+        
+        if not token_info:
+            return redirect('http://localhost:3000/music?error=token_error')
+        
+        # Store token in database
+        db = get_db()
+        if db is not None:
+            db.spotify_tokens.update_one(
+                {'user_id': ObjectId(user_id)},
+                {
+                    '$set': {
+                        'access_token': token_info['access_token'],
+                        'refresh_token': token_info['refresh_token'],
+                        'expires_at': token_info['expires_at'],
+                        'updated_at': datetime.utcnow()
+                    }
+                },
+                upsert=True
+            )
+        
+        return redirect('http://localhost:3000/music?success=spotify_connected')
+        
+    except Exception as e:
+        print(f"Callback error: {e}")
+        return redirect(f'http://localhost:3000/music?error=callback_error')
 
 @music_bp.route('/create-spotify-playlist', methods=['POST'])
 @jwt_required()

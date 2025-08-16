@@ -9,7 +9,11 @@ class SpotifyService:
         """Initialize Spotify service with client credentials"""
         self.client_id = os.getenv('SPOTIFY_CLIENT_ID')
         self.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:8888/callback')
+        self.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5001/api/music/spotify/callback')
+        
+        # Debug environment loading
+        print(f"Environment SPOTIFY_REDIRECT_URI: {os.getenv('SPOTIFY_REDIRECT_URI')}")
+        print(f"Final redirect_uri: {self.redirect_uri}")
         
         # Debug: Print what we're getting from environment
         print(f"Debug - Loaded Client ID: {self.client_id[:10] + '...' if self.client_id else 'None'}")
@@ -321,6 +325,7 @@ class SpotifyService:
             return None
             
         try:
+            print(f"Using redirect URI: {self.redirect_uri}")
             oauth = SpotifyOAuth(
                 client_id=self.client_id,
                 client_secret=self.client_secret,
@@ -331,6 +336,7 @@ class SpotifyService:
             
             auth_url = oauth.get_authorize_url()
             print(f"Generated OAuth URL: {auth_url}")
+            print(f"Redirect URI in URL: {self.redirect_uri}")
             return auth_url
         except Exception as e:
             print(f"Error generating OAuth URL: {e}")

@@ -39,7 +39,7 @@ class CallbackHandler(BaseHTTPRequestHandler):
                 </head>
                 <body>
                     <div class="container">
-                        <h1>🎉 Success!</h1>
+                        <h1>Success!</h1>
                         <p>Spotify authentication completed successfully!</p>
                         <p>You can now close this window and return to your app.</p>
                     </div>
