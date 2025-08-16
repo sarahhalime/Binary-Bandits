@@ -3,6 +3,10 @@ from datetime import datetime
 import re
 
 # Optional AI import - graceful fallback if not available
+AI_AVAILABLE = False
+model = None
+genai = None
+
 try:
     import google.generativeai as genai
     
@@ -12,15 +16,16 @@ try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-pro')
         AI_AVAILABLE = True
+        print("✅ AI service initialized successfully")
     else:
-        AI_AVAILABLE = False
-        model = None
         print("⚠️  GEMINI_API_KEY not provided - AI features will be disabled")
         
-except ImportError:
-    AI_AVAILABLE = False
-    model = None
-    print("⚠️  google-generativeai not installed - AI features will be disabled")
+except ImportError as e:
+    print(f"⚠️  google-generativeai not available: {e}")
+    print("⚠️  AI features will be disabled")
+except Exception as e:
+    print(f"⚠️  Failed to initialize AI service: {e}")
+    print("⚠️  AI features will be disabled")
 
 # Crisis detection keywords
 CRISIS_KEYWORDS = [
