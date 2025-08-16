@@ -11,6 +11,7 @@ import Journal from './pages/Journal';
 import Activities from './pages/Activities';
 import Social from './pages/Social';
 import Profile from './pages/Profile';
+import OnboardingFlow from './components/OnboardingFlow';
 import './index.css';
 
 // Protected Route Component
@@ -89,6 +90,11 @@ function AppContent() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/onboarding" element={
+            <ProtectedRoute>
+              <OnboardingFlow />
             </ProtectedRoute>
           } />
         </Routes>
