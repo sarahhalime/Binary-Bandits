@@ -145,6 +145,28 @@ const OnboardingFlow = () => {
     return errors;
   };
 
+  // Validation for Preferences step
+  const validatePreferencesStep = () => {
+    const errors = [];
+    
+    // Check if at least one music genre is selected
+    if (profileData.musicGenres.length === 0) {
+      errors.push('Please select at least one music genre you enjoy');
+    }
+    
+    // Check if at least one activity preference is selected
+    if (profileData.activityPreferences.length === 0) {
+      errors.push('Please select at least one preferred activity for mental wellness');
+    }
+    
+    // Check if content length is selected
+    if (!profileData.contentLength) {
+      errors.push('Please select your preferred content length');
+    }
+    
+    return errors;
+  };
+
   const nextStep = () => {
     // Validate Mental Health Profile step (Step 2) before proceeding
     if (currentStep === 2) {
@@ -159,6 +181,16 @@ const OnboardingFlow = () => {
     // Validate Lifestyle step (Step 3) before proceeding
     if (currentStep === 3) {
       const errors = validateLifestyleStep();
+      if (errors.length > 0) {
+        // Show error messages
+        errors.forEach(error => toast.error(error));
+        return; // Don't proceed to next step
+      }
+    }
+    
+    // Validate Preferences step (Step 4) before proceeding
+    if (currentStep === 4) {
+      const errors = validatePreferencesStep();
       if (errors.length > 0) {
         // Show error messages
         errors.forEach(error => toast.error(error));
