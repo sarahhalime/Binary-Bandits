@@ -60,7 +60,7 @@ const FloatingActionButton = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-2xl flex items-center justify-center text-white hover:shadow-3xl transition-all duration-300"
+        className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-2xl flex items-center justify-center text-white hover:shadow-xl transition-all duration-300"
       >
         <AnimatePresence mode="wait">
           {isOpen ? (

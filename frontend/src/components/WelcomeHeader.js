@@ -32,17 +32,27 @@ const WelcomeHeader = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-6xl mx-auto px-6 py-8"
     >
-      <div className="bg-gradient-to-br from-white/85 to-slate-50/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/40">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-white/90 via-white/85 to-slate-50/80 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl border border-white/50">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-pattern opacity-20" />
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30" />
+        
+        {/* Shimmer Effect */}
+        <div className="absolute inset-0 shimmer opacity-10" />
+        
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
           {/* Welcome Section */}
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-6">
               <motion.div
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
-                className="p-4 bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 rounded-2xl shadow-xl"
+                className="relative p-4 bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 rounded-2xl shadow-xl"
               >
-                <greetingIcon className="w-7 h-7 text-white" />
+                <greetingIcon className="w-7 h-7 text-white relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-400/50 to-pink-500/50 rounded-2xl blur-lg" />
               </motion.div>
               <div>
                 <h1 className="text-4xl lg:text-5xl font-display font-bold text-gradient-alt mb-2">
@@ -56,9 +66,10 @@ const WelcomeHeader = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-5 border border-indigo-100"
+              className="relative bg-gradient-to-r from-indigo-50/80 via-purple-50/80 to-pink-50/80 rounded-2xl p-5 border border-indigo-100/50 backdrop-blur-sm"
             >
-              <div className="flex items-center gap-3">
+              <div className="absolute inset-0 bg-pattern opacity-30 rounded-2xl" />
+              <div className="relative z-10 flex items-center gap-3">
                 <Sparkles className="w-5 h-5 text-indigo-600" />
                 <p className="text-indigo-800 font-medium font-body">
                   Today's focus: Embrace the present moment and find joy in the little things
@@ -75,14 +86,19 @@ const WelcomeHeader = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 * index }}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center border border-white/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="relative bg-white/90 backdrop-blur-xl rounded-2xl p-5 text-center border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
               >
-                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 mb-4 shadow-md`}>
-                  <stat.icon className={`w-7 h-7 ${stat.color}`} />
+                {/* Card Background Pattern */}
+                <div className="absolute inset-0 bg-pattern opacity-20 rounded-2xl" />
+                
+                <div className="relative z-10">
+                  <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 mb-4 shadow-lg`}>
+                    <stat.icon className={`w-7 h-7 ${stat.color}`} />
+                  </div>
+                  <div className="text-3xl font-display font-bold text-slate-800 mb-1">{stat.value}</div>
+                  <div className="text-sm font-body text-slate-600 font-medium">{stat.label}</div>
+                  <div className="text-xs text-slate-500 mt-1">{stat.subtitle}</div>
                 </div>
-                <div className="text-3xl font-display font-bold text-slate-800 mb-1">{stat.value}</div>
-                <div className="text-sm font-body text-slate-600 font-medium">{stat.label}</div>
-                <div className="text-xs text-slate-500 mt-1">{stat.subtitle}</div>
               </motion.div>
             ))}
           </div>

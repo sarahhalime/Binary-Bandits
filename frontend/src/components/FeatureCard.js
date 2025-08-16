@@ -24,17 +24,24 @@ const FeatureCard = ({
       className="group relative"
     >
       <Link to={path} className="block">
-        <div className="relative overflow-hidden bg-gradient-to-br from-white/85 to-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/40 transition-all duration-500 hover:shadow-3xl">
-          {/* Background Gradient Overlay */}
-          <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-8 transition-opacity duration-500`} />
+        <div className="relative overflow-hidden bg-gradient-to-br from-white/90 via-white/85 to-white/80 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl border border-white/60 transition-all duration-500 hover:shadow-2xl">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-pattern opacity-10" />
+          
+          {/* Gradient Overlay */}
+          <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+          
+          {/* Shimmer Effect */}
+          <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
           
           {/* Icon */}
           <motion.div
             whileHover={{ rotate: 360, scale: 1.1 }}
             transition={{ duration: 0.6 }}
-            className={`relative z-10 inline-flex items-center justify-center w-18 h-18 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 mb-6 group-hover:shadow-lg transition-all duration-300 shadow-md`}
+            className={`relative z-10 inline-flex items-center justify-center w-18 h-18 rounded-2xl bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 mb-6 group-hover:shadow-xl transition-all duration-300 shadow-lg`}
           >
             <Icon className={`w-9 h-9 ${iconColor} transition-all duration-300 group-hover:scale-110`} />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent rounded-2xl" />
           </motion.div>
 
           {/* Content */}
@@ -48,7 +55,7 @@ const FeatureCard = ({
           </div>
 
           {/* Hover Effect Border */}
-          <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-white/30 transition-all duration-500" />
+          <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-white/40 transition-all duration-500" />
           
           {/* Floating Particles */}
           <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
@@ -82,6 +89,9 @@ const FeatureCard = ({
 
           {/* Subtle glow effect */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          {/* Mesh Pattern Overlay */}
+          <div className="absolute inset-0 bg-mesh opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
         </div>
       </Link>
     </motion.div>
