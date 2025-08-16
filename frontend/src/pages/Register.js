@@ -101,18 +101,20 @@ const Register = () => {
     'rgba(255,255,255,0.25)',
     'rgba(255,255,255,0.18)',
   ];
-  const bubbles = Array.from({ length: 16 }).map((_, i) => ({
-    size: Math.random() * 160 + 100,
-    left: Math.random() * 90 + '%',
-    top: Math.random() * 90 + '%',
-    color: bubbleColors[i % bubbleColors.length],
-    duration: Math.random() * 10 + 8,
-    delay: Math.random() * 6,
-    blur: Math.random() * 8 + 6,
-    opacity: Math.random() * 0.3 + 0.3,
-    direction: i % 2 === 0 ? 1 : -1,
-    rotate: Math.random() * 30 - 15,
-  }));
+  const [bubbles] = useState(() =>
+    Array.from({ length: 16 }).map((_, i) => ({
+      size: Math.random() * 160 + 100,
+      left: Math.random() * 90 + '%',
+      top: Math.random() * 90 + '%',
+      color: bubbleColors[i % bubbleColors.length],
+      duration: Math.random() * 10 + 8,
+      delay: Math.random() * 6,
+      blur: Math.random() * 8 + 6,
+      opacity: Math.random() * 0.3 + 0.3,
+      direction: i % 2 === 0 ? 1 : -1,
+      rotate: Math.random() * 30 - 15,
+    }))
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #e3f0ff 0%, #f8faff 100%)' }}>
