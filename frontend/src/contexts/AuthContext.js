@@ -107,6 +107,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserPhoto = (photoData) => {
+    // Update user context immediately with new photo
+    if (user) {
+      setUser(prevUser => ({
+        ...prevUser,
+        profile_pic: photoData
+      }));
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -114,6 +124,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    updateUserPhoto,
   };
 
   return (

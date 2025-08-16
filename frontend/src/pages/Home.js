@@ -14,7 +14,9 @@ import {
   Meh,
   Zap,
   Coffee,
-  Heart as HeartIcon
+  Heart as HeartIcon,
+  User,
+  Settings
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -86,6 +88,14 @@ const Home = () => {
   };
 
   const quickActions = [
+    {
+      title: 'Complete Profile Setup',
+      description: 'Personalize your experience',
+      icon: User,
+      color: 'purple',
+      path: '/onboarding',
+      isNew: true
+    },
     {
       title: 'Generate Playlist',
       description: 'Get music based on your mood',
@@ -203,7 +213,7 @@ const Home = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="grid md:grid-cols-3 gap-6 mb-8"
+        className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
       >
         {quickActions.map((action, index) => {
           const Icon = action.icon;
@@ -214,9 +224,16 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.1 }}
               whileHover={{ scale: 1.02 }}
-              className="card cursor-pointer group"
+              className={`card cursor-pointer group relative ${
+                action.isNew ? 'ring-2 ring-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50' : ''
+              }`}
               onClick={() => window.location.href = action.path}
             >
+              {action.isNew && (
+                <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                  NEW
+                </div>
+              )}
               <div className={`w-12 h-12 bg-${action.color}-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-${action.color}-200 transition-colors`}>
                 <Icon className={`text-${action.color}-600`} size={24} />
               </div>

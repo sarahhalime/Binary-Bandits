@@ -52,6 +52,12 @@ export const authAPI = {
   
   getFriendCode: () => 
     api.get('/auth/friend-code').then(res => res.data.friend_code),
+  
+  completeOnboarding: (profileData) => 
+    api.post('/auth/onboarding', profileData).then(res => res.data),
+  
+  updateProfilePhoto: (photoData) => 
+    api.post('/auth/profile/photo', { profilePhoto: photoData }).then(res => res.data),
 };
 
 // Mood API
