@@ -470,3 +470,542 @@ def remove_friend(friend_id):
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# Vent Wall Endpoints
+
+@social_bp.route('/vent', methods=['POST'])
+@jwt_required()
+def create_vent_post():
+    """Create an anonymous vent post"""
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        
+        # Debug logging
+        print(f"Received vent post data: {data}")
+        print(f"User ID: {user_id}")
+        
+        # Validate request data exists
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Validate required fields
+        if not data.get('content'):
+            return jsonify({'error': 'Content is required'}), 400
+        
+        content = data['content'].strip()
+        if len(content) < 5:
+            return jsonify({'error': 'Content must be at least 5 characters'}), 400
+        
+        if len(content) > 500:
+            return jsonify({'error': 'Content must be less than 500 characters'}), 400
+        
+        mood = data.get('mood', 'neutral')
+        tags = data.get('tags', [])
+        
+        # Validate tags
+        if len(tags) > 5:
+            return jsonify({'error': 'Maximum 5 tags allowed'}), 400
+        
+        db = get_db()
+        
+        # Demo mode - return sample response
+        if db is None:
+            return jsonify({
+                'message': 'Vent post created successfully',
+                'post': {
+                    'id': f'demo_vent_{int(datetime.utcnow().timestamp())}',
+                    'content': content,
+                    'mood': mood,
+                    'tags': tags,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'reactions': {},
+                    'reaction_count': 0
+                }
+            }), 201
+        
+        # Create vent post
+        vent_post = {
+            'user_id': ObjectId(user_id),
+            'content': content,
+            'mood': mood,
+            'tags': tags,
+            'timestamp': datetime.utcnow(),
+            'reactions': {},  # Format: {user_id: reaction_type}
+            'is_active': True
+        }
+        
+        result = db.vent_posts.insert_one(vent_post)
+        
+        return jsonify({
+            'message': 'Vent post created successfully',
+            'post': {
+                'id': str(result.inserted_id),
+                'content': content,
+                'mood': mood,
+                'tags': tags,
+                'timestamp': vent_post['timestamp'].isoformat(),
+                'reactions': {},
+                'reaction_count': 0
+            }
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@social_bp.route('/vent', methods=['GET'])
+@jwt_required()
+def get_vent_posts():
+    """Get vent posts feed (anonymous)"""
+    try:
+        user_id = get_jwt_identity()
+        db = get_db()
+        
+        # Get query parameters
+        limit = request.args.get('limit', 20, type=int)
+        mood_filter = request.args.get('mood')
+        tag_filter = request.args.get('tag')
+        
+        # Demo mode - return sample posts
+        if db is None:
+            demo_posts = [
+                {
+                    'id': 'demo_vent_1',
+                    'content': 'Feeling overwhelmed with work lately. Just need to get this off my chest.',
+                    'mood': 'stressed',
+                    'tags': ['work', 'stress'],
+                    'timestamp': (datetime.utcnow() - timedelta(hours=2)).isoformat(),
+                    'reactions': {
+                        'hug': 3,
+                        'heart': 2,
+                        'support': 1
+                    },
+                    'reaction_count': 6,
+                    'user_reaction': None,
+                    'relative_time': '2 hours ago'
+                },
+                {
+                    'id': 'demo_vent_2',
+                    'content': 'Today was actually pretty good! Small wins matter too.',
+                    'mood': 'happy',
+                    'tags': ['gratitude', 'positivity'],
+                    'timestamp': (datetime.utcnow() - timedelta(hours=5)).isoformat(),
+                    'reactions': {
+                        'heart': 5,
+                        'celebrate': 2
+                    },
+                    'reaction_count': 7,
+                    'user_reaction': 'heart',
+                    'relative_time': '5 hours ago'
+                },
+                {
+                    'id': 'demo_vent_3',
+                    'content': 'Anxiety has been really tough this week. Trying to take it one day at a time.',
+                    'mood': 'anxious',
+                    'tags': ['anxiety', 'mental-health'],
+                    'timestamp': (datetime.utcnow() - timedelta(hours=8)).isoformat(),
+                    'reactions': {
+                        'hug': 8,
+                        'support': 4,
+                        'heart': 3
+                    },
+                    'reaction_count': 15,
+                    'user_reaction': 'support',
+                    'relative_time': '8 hours ago'
+                }
+            ]
+            
+            # Apply filters
+            if mood_filter:
+                demo_posts = [p for p in demo_posts if p['mood'] == mood_filter]
+            if tag_filter:
+                demo_posts = [p for p in demo_posts if tag_filter in p['tags']]
+            
+            return jsonify({
+                'posts': demo_posts[:limit],
+                'total_posts': len(demo_posts)
+            }), 200
+        
+        # Build query
+        query = {'is_active': True}
+        if mood_filter:
+            query['mood'] = mood_filter
+        if tag_filter:
+            query['tags'] = tag_filter
+        
+        # Get vent posts
+        posts = list(db.vent_posts.find(query)
+                    .sort('timestamp', -1)
+                    .limit(limit))
+        
+        # Process posts (anonymize and add reaction info)
+        processed_posts = []
+        for post in posts:
+            # Count reactions by type
+            reactions = {}
+            for reaction in post.get('reactions', {}).values():
+                reactions[reaction] = reactions.get(reaction, 0) + 1
+            
+            # Check if current user reacted
+            user_reaction = post.get('reactions', {}).get(str(user_id))
+            
+            # Calculate relative time
+            time_diff = datetime.utcnow() - post['timestamp']
+            if time_diff.days > 0:
+                relative_time = f"{time_diff.days} days ago"
+            elif time_diff.seconds >= 3600:
+                hours = time_diff.seconds // 3600
+                relative_time = f"{hours} hours ago"
+            elif time_diff.seconds >= 60:
+                minutes = time_diff.seconds // 60
+                relative_time = f"{minutes} minutes ago"
+            else:
+                relative_time = "Just now"
+            
+            processed_posts.append({
+                'id': str(post['_id']),
+                'content': post['content'],
+                'mood': post['mood'],
+                'tags': post['tags'],
+                'timestamp': post['timestamp'].isoformat(),
+                'reactions': reactions,
+                'reaction_count': sum(reactions.values()),
+                'user_reaction': user_reaction,
+                'relative_time': relative_time
+            })
+        
+        return jsonify({
+            'posts': processed_posts,
+            'total_posts': len(processed_posts)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@social_bp.route('/vent/<post_id>/react', methods=['POST'])
+@jwt_required()
+def react_to_vent_post(post_id):
+    """Add or update reaction to a vent post"""
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        
+        # Validate reaction type
+        reaction_type = data.get('reaction')
+        valid_reactions = ['heart', 'hug', 'support', 'celebrate', 'strength']
+        
+        if not reaction_type or reaction_type not in valid_reactions:
+            return jsonify({'error': 'Invalid reaction type'}), 400
+        
+        db = get_db()
+        
+        # Demo mode - return success
+        if db is None:
+            return jsonify({
+                'message': 'Reaction added successfully',
+                'reaction': reaction_type
+            }), 200
+        
+        # Update or add reaction
+        update_query = {
+            '$set': {f'reactions.{user_id}': reaction_type}
+        }
+        
+        result = db.vent_posts.update_one(
+            {'_id': ObjectId(post_id), 'is_active': True},
+            update_query
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'error': 'Post not found'}), 404
+        
+        return jsonify({
+            'message': 'Reaction added successfully',
+            'reaction': reaction_type
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@social_bp.route('/vent/<post_id>/react', methods=['DELETE'])
+@jwt_required()
+def remove_vent_reaction(post_id):
+    """Remove reaction from a vent post"""
+    try:
+        user_id = get_jwt_identity()
+        db = get_db()
+        
+        # Demo mode - return success
+        if db is None:
+            return jsonify({
+                'message': 'Reaction removed successfully'
+            }), 200
+        
+        # Remove reaction
+        result = db.vent_posts.update_one(
+            {'_id': ObjectId(post_id), 'is_active': True},
+            {'$unset': {f'reactions.{user_id}': 1}}
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'error': 'Post not found'}), 404
+        
+        return jsonify({
+            'message': 'Reaction removed successfully'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@social_bp.route('/vent/stats', methods=['GET'])
+@jwt_required()
+def get_vent_stats():
+    """Get vent wall statistics"""
+    try:
+        user_id = get_jwt_identity()
+        db = get_db()
+        
+        # Demo mode - return sample stats
+        if db is None:
+            return jsonify({
+                'total_posts': 15,
+                'posts_today': 3,
+                'user_posts': 2,
+                'reactions_given': 8,
+                'reactions_received': 12,
+                'popular_moods': [
+                    {'mood': 'anxious', 'count': 5},
+                    {'mood': 'happy', 'count': 4},
+                    {'mood': 'stressed', 'count': 3}
+                ],
+                'popular_tags': [
+                    {'tag': 'anxiety', 'count': 4},
+                    {'tag': 'work', 'count': 3},
+                    {'tag': 'gratitude', 'count': 2}
+                ]
+            }), 200
+        
+        # Calculate stats
+        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Total posts
+        total_posts = db.vent_posts.count_documents({'is_active': True})
+        
+        # Posts today
+        posts_today = db.vent_posts.count_documents({
+            'is_active': True,
+            'timestamp': {'$gte': today}
+        })
+        
+        # User's posts
+        user_posts = db.vent_posts.count_documents({
+            'user_id': ObjectId(user_id),
+            'is_active': True
+        })
+        
+        # User's reactions given
+        reactions_given = len(list(db.vent_posts.find({
+            f'reactions.{user_id}': {'$exists': True}
+        })))
+        
+        # Reactions received on user's posts
+        user_post_reactions = list(db.vent_posts.find({
+            'user_id': ObjectId(user_id),
+            'is_active': True
+        }, {'reactions': 1}))
+        
+        reactions_received = sum(len(post.get('reactions', {})) for post in user_post_reactions)
+        
+        # Popular moods and tags would require aggregation pipelines
+        # For now, return basic stats
+        
+        return jsonify({
+            'total_posts': total_posts,
+            'posts_today': posts_today,
+            'user_posts': user_posts,
+            'reactions_given': reactions_given,
+            'reactions_received': reactions_received
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Comment Endpoints
+
+@social_bp.route('/vent/<post_id>/comments', methods=['POST'])
+@jwt_required()
+def create_comment(post_id):
+    """Create a comment on a vent post"""
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('content'):
+            return jsonify({'error': 'Comment content is required'}), 400
+        
+        content = data['content'].strip()
+        if len(content) < 1:
+            return jsonify({'error': 'Comment cannot be empty'}), 400
+        
+        if len(content) > 300:
+            return jsonify({'error': 'Comment must be less than 300 characters'}), 400
+        
+        db = get_db()
+        
+        # Demo mode - return sample response
+        if db is None:
+            return jsonify({
+                'message': 'Comment created successfully',
+                'comment': {
+                    'id': f'demo_comment_{int(datetime.utcnow().timestamp())}',
+                    'content': content,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'relative_time': 'Just now',
+                    'is_anonymous': True
+                }
+            }), 201
+        
+        # Verify the post exists
+        post = db.vent_posts.find_one({'_id': ObjectId(post_id), 'is_active': True})
+        if not post:
+            return jsonify({'error': 'Post not found'}), 404
+        
+        # Create comment
+        comment = {
+            'post_id': ObjectId(post_id),
+            'user_id': ObjectId(user_id),
+            'content': content,
+            'timestamp': datetime.utcnow(),
+            'is_active': True
+        }
+        
+        result = db.vent_comments.insert_one(comment)
+        
+        return jsonify({
+            'message': 'Comment created successfully',
+            'comment': {
+                'id': str(result.inserted_id),
+                'content': content,
+                'timestamp': comment['timestamp'].isoformat(),
+                'relative_time': 'Just now',
+                'is_anonymous': True
+            }
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@social_bp.route('/vent/<post_id>/comments', methods=['GET'])
+@jwt_required()
+def get_comments(post_id):
+    """Get comments for a vent post"""
+    try:
+        user_id = get_jwt_identity()
+        db = get_db()
+        
+        # Get query parameters
+        limit = request.args.get('limit', 10, type=int)
+        
+        # Demo mode - return sample comments
+        if db is None:
+            demo_comments = [
+                {
+                    'id': 'demo_comment_1',
+                    'content': 'You\'re not alone in feeling this way. Sending you support! 💙',
+                    'timestamp': (datetime.utcnow() - timedelta(minutes=30)).isoformat(),
+                    'relative_time': '30 minutes ago',
+                    'is_anonymous': True
+                },
+                {
+                    'id': 'demo_comment_2',
+                    'content': 'Thank you for sharing. Your courage to speak up inspires others.',
+                    'timestamp': (datetime.utcnow() - timedelta(hours=1)).isoformat(),
+                    'relative_time': '1 hour ago',
+                    'is_anonymous': True
+                },
+                {
+                    'id': 'demo_comment_3',
+                    'content': 'This resonates with me so much. We\'re in this together! ✨',
+                    'timestamp': (datetime.utcnow() - timedelta(hours=2)).isoformat(),
+                    'relative_time': '2 hours ago',
+                    'is_anonymous': True
+                }
+            ]
+            
+            return jsonify({
+                'comments': demo_comments[:limit],
+                'total_comments': len(demo_comments)
+            }), 200
+        
+        # Get comments for the post
+        comments = list(db.vent_comments.find({
+            'post_id': ObjectId(post_id),
+            'is_active': True
+        }).sort('timestamp', 1).limit(limit))
+        
+        # Process comments (anonymize and add relative time)
+        processed_comments = []
+        for comment in comments:
+            # Calculate relative time
+            time_diff = datetime.utcnow() - comment['timestamp']
+            if time_diff.days > 0:
+                relative_time = f"{time_diff.days} days ago"
+            elif time_diff.seconds >= 3600:
+                hours = time_diff.seconds // 3600
+                relative_time = f"{hours} hours ago"
+            elif time_diff.seconds >= 60:
+                minutes = time_diff.seconds // 60
+                relative_time = f"{minutes} minutes ago"
+            else:
+                relative_time = "Just now"
+            
+            processed_comments.append({
+                'id': str(comment['_id']),
+                'content': comment['content'],
+                'timestamp': comment['timestamp'].isoformat(),
+                'relative_time': relative_time,
+                'is_anonymous': True  # Always anonymous for privacy
+            })
+        
+        return jsonify({
+            'comments': processed_comments,
+            'total_comments': len(processed_comments)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@social_bp.route('/vent/comments/<comment_id>', methods=['DELETE'])
+@jwt_required()
+def delete_comment(comment_id):
+    """Delete a comment (only by the comment author)"""
+    try:
+        user_id = get_jwt_identity()
+        db = get_db()
+        
+        # Demo mode - return success
+        if db is None:
+            return jsonify({
+                'message': 'Comment deleted successfully'
+            }), 200
+        
+        # Find and delete the comment (only if user is the author)
+        result = db.vent_comments.update_one(
+            {
+                '_id': ObjectId(comment_id),
+                'user_id': ObjectId(user_id),
+                'is_active': True
+            },
+            {'$set': {'is_active': False}}
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'error': 'Comment not found or unauthorized'}), 404
+        
+        return jsonify({
+            'message': 'Comment deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

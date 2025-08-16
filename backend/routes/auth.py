@@ -43,6 +43,7 @@ def register():
         return jsonify({
             'message': 'User registered successfully',
             'access_token': access_token,
+            'token': access_token,  # For frontend compatibility
             'user': user.to_dict()
         }), 201
         
@@ -84,6 +85,7 @@ def login():
         return jsonify({
             'message': 'Login successful',
             'access_token': access_token,
+            'token': access_token,  # For frontend compatibility
             'user': user.to_dict()
         }), 200
         

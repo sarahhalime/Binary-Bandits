@@ -53,6 +53,17 @@ def create_indexes():
     # Friend connections indexes
     db.friend_connections.create_index([("user_id", 1), ("friend_id", 1)], unique=True)
     
+    # Vent posts indexes
+    db.vent_posts.create_index([("timestamp", -1)])
+    db.vent_posts.create_index([("is_active", 1), ("timestamp", -1)])
+    db.vent_posts.create_index([("mood", 1), ("timestamp", -1)])
+    db.vent_posts.create_index([("tags", 1), ("timestamp", -1)])
+    
+    # Vent comments indexes
+    db.vent_comments.create_index([("post_id", 1), ("timestamp", 1)])
+    db.vent_comments.create_index([("is_active", 1), ("timestamp", 1)])
+    db.vent_comments.create_index([("user_id", 1), ("timestamp", -1)])
+    
     print("✅ Database indexes created successfully")
 
 def get_db():
