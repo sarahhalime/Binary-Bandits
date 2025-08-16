@@ -220,6 +220,38 @@ class User:
         if user_data:
             user = User.__new__(User)
             user.__dict__.update(user_data)
+            
+            # Ensure profile_data exists for backwards compatibility
+            if not hasattr(user, 'profile_data') or user.profile_data is None:
+                user.profile_data = {
+                    'age': None,
+                    'bio': '',
+                    'primary_concerns': [],
+                    'therapy_experience': '',
+                    'preferred_communication_style': '',
+                    'coping_strategies': [],
+                    'support_system': '',
+                    'occupation': '',
+                    'stress_level': 5,
+                    'sleep_schedule': {
+                        'bedtime': '',
+                        'wake_time': '',
+                        'sleep_quality': 5
+                    },
+                    'music_genres': [],
+                    'activity_preferences': [],
+                    'content_length': '',
+                    'motivational_style': '',
+                    'goals': [],
+                    'notification_preferences': {
+                        'daily_check_in': True,
+                        'mood_reminders': True,
+                        'activity_suggestions': True
+                    },
+                    'preferred_notification_times': [],
+                    'onboarding_completed': False
+                }
+            
             return user
         return None
 
@@ -269,6 +301,37 @@ class User:
     def update_profile_data(self, profile_data):
         """Update user's extended profile data from onboarding"""
         db = get_db()
+        
+        # Ensure profile_data exists before updating
+        if not hasattr(self, 'profile_data') or self.profile_data is None:
+            self.profile_data = {
+                'age': None,
+                'bio': '',
+                'primary_concerns': [],
+                'therapy_experience': '',
+                'preferred_communication_style': '',
+                'coping_strategies': [],
+                'support_system': '',
+                'occupation': '',
+                'stress_level': 5,
+                'sleep_schedule': {
+                    'bedtime': '',
+                    'wake_time': '',
+                    'sleep_quality': 5
+                },
+                'music_genres': [],
+                'activity_preferences': [],
+                'content_length': '',
+                'motivational_style': '',
+                'goals': [],
+                'notification_preferences': {
+                    'daily_check_in': True,
+                    'mood_reminders': True,
+                    'activity_suggestions': True
+                },
+                'preferred_notification_times': [],
+                'onboarding_completed': False
+            }
         
         # Update the instance
         if profile_data:

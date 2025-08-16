@@ -233,14 +233,22 @@ def complete_onboarding():
         success = user.update_profile_data(profile_data)
         
         if success:
-            return jsonify({
-                'message': 'Onboarding completed successfully',
-                'user': user.to_dict()
-            }), 200
+            try:
+                user_dict = user.to_dict()
+                return jsonify({
+                    'message': 'Onboarding completed successfully',
+                    'user': user_dict
+                }), 200
+            except Exception as dict_error:
+                print(f"Error converting user to dict: {dict_error}")
+                return jsonify({'error': f'Error serializing user data: {str(dict_error)}'}), 500
         else:
             return jsonify({'error': 'Failed to update profile data'}), 500
         
     except Exception as e:
+        print(f"Onboarding error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @auth_bp.route('/profile/photo', methods=['POST'])

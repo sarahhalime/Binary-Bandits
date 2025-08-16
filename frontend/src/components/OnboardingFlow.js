@@ -492,37 +492,7 @@ const OnboardingFlow = () => {
                   #fecaca 80%, #fecaca 100%)`
               }}
             />
-            <style jsx>{`
-              .stress-slider::-webkit-slider-thumb {
-                appearance: none;
-                height: 20px;
-                width: 20px;
-                border-radius: 50%;
-                background: ${
-                  profileData.stressLevel <= 3 ? '#16a34a' :
-                  profileData.stressLevel <= 6 ? '#ca8a04' :
-                  profileData.stressLevel <= 8 ? '#ea580c' :
-                  '#dc2626'
-                };
-                cursor: pointer;
-                border: 2px solid white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-              }
-              .stress-slider::-moz-range-thumb {
-                height: 20px;
-                width: 20px;
-                border-radius: 50%;
-                background: ${
-                  profileData.stressLevel <= 3 ? '#16a34a' :
-                  profileData.stressLevel <= 6 ? '#ca8a04' :
-                  profileData.stressLevel <= 8 ? '#ea580c' :
-                  '#dc2626'
-                };
-                cursor: pointer;
-                border: 2px solid white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-              }
-            `}</style>
+
           </div>
           <div className="flex justify-between text-xs mt-2">
             <span className="text-green-600 font-medium">😌 Low stress</span>
@@ -574,37 +544,7 @@ const OnboardingFlow = () => {
                   #dcfce7 80%, #dcfce7 100%)`
               }}
             />
-            <style jsx>{`
-              .sleep-slider::-webkit-slider-thumb {
-                appearance: none;
-                height: 20px;
-                width: 20px;
-                border-radius: 50%;
-                background: ${
-                  profileData.sleepSchedule.sleepQuality <= 3 ? '#dc2626' :
-                  profileData.sleepSchedule.sleepQuality <= 6 ? '#ea580c' :
-                  profileData.sleepSchedule.sleepQuality <= 8 ? '#ca8a04' :
-                  '#16a34a'
-                };
-                cursor: pointer;
-                border: 2px solid white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-              }
-              .sleep-slider::-moz-range-thumb {
-                height: 20px;
-                width: 20px;
-                border-radius: 50%;
-                background: ${
-                  profileData.sleepSchedule.sleepQuality <= 3 ? '#dc2626' :
-                  profileData.sleepSchedule.sleepQuality <= 6 ? '#ea580c' :
-                  profileData.sleepSchedule.sleepQuality <= 8 ? '#ca8a04' :
-                  '#16a34a'
-                };
-                cursor: pointer;
-                border: 2px solid white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-              }
-            `}</style>
+
           </div>
           <div className="flex justify-between text-xs mt-2">
             <span className="text-red-600 font-medium">😴 Poor sleep</span>
