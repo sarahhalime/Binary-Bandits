@@ -384,8 +384,8 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              className={`card cursor-pointer group relative w-full flex items-center px-10 py-12 ${
+
+              className={`card cursor-pointer group relative w-full flex items-center px-10 py-12 feature-box ${
                 action.isNew ? 'ring-2 ring-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50' : ''
               }`}
               onClick={() => window.location.href = action.path}

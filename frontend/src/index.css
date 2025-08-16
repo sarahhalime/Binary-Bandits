@@ -12,7 +12,7 @@
 
 .animate-gradient-move {
   animation: gradientMove 6s ease-in-out infinite;
-}@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+}@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -52,6 +52,141 @@
   
   .card {
     @apply bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white/90;
+  }
+
+  /* Feature boxes with pink and blue gradient borders */
+  .feature-box {
+    position: relative;
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #ec4899, #3b82f6, #8b5cf6, #06b6d4) border-box;
+    animation: gentleFloat 4s ease-in-out infinite;
+  }
+
+  .feature-box:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  .feature-box:nth-child(2) {
+    animation-delay: -1s;
+  }
+
+  .feature-box:nth-child(3) {
+    animation-delay: -2s;
+  }
+
+  .feature-box:nth-child(4) {
+    animation-delay: -3s;
+  }
+
+  .feature-box:hover {
+    background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box,
+                linear-gradient(135deg, #f97316, #ec4899, #3b82f6, #8b5cf6) border-box;
+    animation-play-state: paused;
+    transform: translateY(-5px) scale(1.02);
+  }
+
+  @keyframes gentleFloat {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-3px) rotate(0.3deg);
+    }
+    50% {
+      transform: translateY(-1px) rotate(0deg);
+    }
+    75% {
+      transform: translateY(-2px) rotate(-0.3deg);
+    }
+  }
+
+  /* Creative typography for feature boxes */
+  .feature-box h3 {
+    font-family: 'Poppins', 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    letter-spacing: -0.02em;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+
+  .feature-box h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+    transition: width 0.3s ease;
+  }
+
+  .feature-box:hover h3 {
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transform: translateY(-1px);
+    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .feature-box:hover h3::after {
+    width: 100%;
+  }
+
+  .feature-box p {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    color: #64748b;
+    letter-spacing: 0.01em;
+    transition: all 0.3s ease;
+    font-style: italic;
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+
+  .feature-box:hover p {
+    color: #475569;
+    transform: translateY(-1px);
+    opacity: 1;
+    font-style: normal;
+  }
+
+  /* Individual box styling for more personality */
+  .feature-box:nth-child(1) h3 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .feature-box:nth-child(2) h3 {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .feature-box:nth-child(3) h3 {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .feature-box:nth-child(4) h3 {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   
   .input-field {
