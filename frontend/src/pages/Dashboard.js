@@ -164,11 +164,11 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="relative z-10">
         {/* Welcome Header */}
-        <WelcomeHeader />
-
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-6 pb-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <WelcomeHeader />
+            {/* Main Content */}
+            <div className="max-w-7xl mx-auto px-6 pb-12">
+              {/* Removed 'How are you feeling today?' text and empty text box */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Features */}
             <div className="lg:col-span-2">
               <motion.div
@@ -253,5 +253,6 @@ const Dashboard = () => {
     </div>
   );
 };
+  {/* Mood selector and related texts removed */}
 
 export default Dashboard;
