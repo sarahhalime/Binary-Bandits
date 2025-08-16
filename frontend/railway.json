@@ -4,6 +4,9 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm run build && npx serve -s build -l 3000"
+    "startCommand": "npm install --legacy-peer-deps && npm run build && npx serve -s build -l $PORT",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE"
   }
 }
