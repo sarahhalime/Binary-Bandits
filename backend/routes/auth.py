@@ -83,7 +83,7 @@ def login():
         
         return jsonify({
             'message': 'Login successful',
-            'access_token': access_token,
+            'token': access_token,
             'user': user.to_dict()
         }), 200
         
@@ -154,6 +154,71 @@ def get_friend_code():
         return jsonify({
             'friend_code': user.friend_code
         }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/onboarding', methods=['POST'])
+@jwt_required()
+def complete_onboarding():
+    """Complete user onboarding with extended profile data"""
+    try:
+        user_id = get_jwt_identity()
+        user = User.find_by_id(user_id)
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        data = request.get_json()
+        
+        # Transform frontend data structure to match backend
+        profile_data = {
+            'age': data.get('age'),
+            'bio': data.get('bio', ''),
+            'primary_concerns': data.get('primaryConcerns', []),
+            'therapy_experience': data.get('therapyExperience', ''),
+            'preferred_communication_style': data.get('preferredCommunicationStyle', ''),
+            'coping_strategies': data.get('copingStrategies', []),
+            'support_system': data.get('supportSystem', ''),
+            'occupation': data.get('occupation', ''),
+            'stress_level': data.get('stressLevel', 5),
+            'sleep_schedule': {
+                'bedtime': data.get('sleepSchedule', {}).get('bedtime', ''),
+                'wake_time': data.get('sleepSchedule', {}).get('wakeTime', ''),
+                'sleep_quality': data.get('sleepSchedule', {}).get('sleepQuality', 5)
+            },
+            'music_genres': data.get('musicGenres', []),
+            'activity_preferences': data.get('activityPreferences', []),
+            'content_length': data.get('contentLength', ''),
+            'motivational_style': data.get('motivationalStyle', ''),
+            'goals': data.get('goals', []),
+            'notification_preferences': {
+                'daily_check_in': data.get('notificationPreferences', {}).get('dailyCheckIn', True),
+                'mood_reminders': data.get('notificationPreferences', {}).get('moodReminders', True),
+                'activity_suggestions': data.get('notificationPreferences', {}).get('activitySuggestions', True)
+            },
+            'preferred_notification_times': data.get('preferredNotificationTimes', []),
+            'onboarding_completed': True
+        }
+        
+        # Update profile photo if provided
+        if data.get('profilePhoto'):
+            user.profile_pic = data.get('profilePhoto')
+        
+        # Update name if provided
+        if data.get('name'):
+            user.name = data.get('name')
+        
+        # Update profile data
+        success = user.update_profile_data(profile_data)
+        
+        if success:
+            return jsonify({
+                'message': 'Onboarding completed successfully',
+                'user': user.to_dict()
+            }), 200
+        else:
+            return jsonify({'error': 'Failed to update profile data'}), 500
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

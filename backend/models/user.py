@@ -27,6 +27,35 @@ class User:
             'sleep_hours': None,
             'exercise_minutes': None
         }
+        # Extended profile data from onboarding
+        self.profile_data = {
+            'age': None,
+            'bio': '',
+            'primary_concerns': [],
+            'therapy_experience': '',
+            'preferred_communication_style': '',
+            'coping_strategies': [],
+            'support_system': '',
+            'occupation': '',
+            'stress_level': 5,
+            'sleep_schedule': {
+                'bedtime': '',
+                'wake_time': '',
+                'sleep_quality': 5
+            },
+            'music_genres': [],
+            'activity_preferences': [],
+            'content_length': '',
+            'motivational_style': '',
+            'goals': [],
+            'notification_preferences': {
+                'daily_check_in': True,
+                'mood_reminders': True,
+                'activity_suggestions': True
+            },
+            'preferred_notification_times': [],
+            'onboarding_completed': False
+        }
         self.created_at = datetime.utcnow()
         self.last_login = datetime.utcnow()
         self.is_active = True
@@ -46,6 +75,37 @@ class User:
 
     def to_dict(self):
         """Convert user to dictionary for JSON serialization"""
+        # Ensure profile_data exists (for backwards compatibility with existing users)
+        if not hasattr(self, 'profile_data'):
+            self.profile_data = {
+                'age': None,
+                'bio': '',
+                'primary_concerns': [],
+                'therapy_experience': '',
+                'preferred_communication_style': '',
+                'coping_strategies': [],
+                'support_system': '',
+                'occupation': '',
+                'stress_level': 5,
+                'sleep_schedule': {
+                    'bedtime': '',
+                    'wake_time': '',
+                    'sleep_quality': 5
+                },
+                'music_genres': [],
+                'activity_preferences': [],
+                'content_length': '',
+                'motivational_style': '',
+                'goals': [],
+                'notification_preferences': {
+                    'daily_check_in': True,
+                    'mood_reminders': True,
+                    'activity_suggestions': True
+                },
+                'preferred_notification_times': [],
+                'onboarding_completed': False
+            }
+        
         return {
             'id': str(self._id) if hasattr(self, '_id') else None,
             'username': self.username,
@@ -55,9 +115,10 @@ class User:
             'friend_code': self.friend_code,
             'favorite_genres': self.favorite_genres,
             'biometrics': self.biometrics,
-            'created_at': self.created_at.isoformat(),
-            'last_login': self.last_login.isoformat(),
-            'is_active': self.is_active
+            'profile_data': self.profile_data,
+            'created_at': self.created_at.isoformat() if hasattr(self, 'created_at') else None,
+            'last_login': self.last_login.isoformat() if hasattr(self, 'last_login') else None,
+            'is_active': getattr(self, 'is_active', True)
         }
 
     @staticmethod
@@ -204,3 +265,26 @@ class User:
             )
         
         return True
+    
+    def update_profile_data(self, profile_data):
+        """Update user's extended profile data from onboarding"""
+        db = get_db()
+        
+        # Update the instance
+        if profile_data:
+            self.profile_data.update(profile_data)
+            
+        # Demo mode - just update the instance
+        if db is None:
+            return True
+            
+        # Update in database
+        try:
+            result = db.users.update_one(
+                {"_id": self._id},
+                {"$set": {"profile_data": self.profile_data}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            print(f"Error updating profile data: {e}")
+            return False
