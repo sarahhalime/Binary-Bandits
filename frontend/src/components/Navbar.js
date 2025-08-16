@@ -12,13 +12,16 @@ import {
   LogOut,
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  Settings,
+  ChevronDown
 } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
@@ -26,7 +29,6 @@ const Navbar = () => {
     { path: '/journal', icon: BookOpen, label: 'Journal' },
     { path: '/activities', icon: Activity, label: 'Activities' },
     { path: '/social', icon: Users, label: 'Social' },
-    { path: '/profile', icon: User, label: 'Profile' },
   ];
 
   const handleLogout = () => {
@@ -87,9 +89,14 @@ const Navbar = () => {
             })}
           </div>
 
-          {/* User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
+          {/* User Profile Dropdown */}
+          <div className="hidden md:flex items-center relative">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+              className="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition-all duration-300"
+            >
               {user?.profile_pic ? (
                 <img 
                   src={user.profile_pic} 
@@ -104,17 +111,105 @@ const Navbar = () => {
                 </div>
               )}
               <span className="text-sm font-medium text-slate-700 font-body">{user?.name}</span>
-            </div>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLogout}
-              className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
-              title="Logout"
-            >
-              <LogOut size={18} />
+              <ChevronDown 
+                className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${
+                  isProfileDropdownOpen ? 'rotate-180' : ''
+                }`} 
+              />
             </motion.button>
+
+            {/* Profile Dropdown Menu */}
+            {isProfileDropdownOpen && (
+              <>
+                {/* Backdrop */}
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setIsProfileDropdownOpen(false)}
+                />
+                
+                {/* Dropdown */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 py-2 z-20"
+                >
+                  {/* Profile Header */}
+                  <div className="px-4 py-3 border-b border-slate-200/50">
+                    <div className="flex items-center space-x-3">
+                      {user?.profile_pic ? (
+                        <img 
+                          src={user.profile_pic} 
+                          alt={user.name}
+                          className="w-12 h-12 rounded-xl object-cover shadow-md"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gradient-to-br from-slate-400 to-slate-600 rounded-xl flex items-center justify-center shadow-md">
+                          <span className="text-white font-medium text-lg font-body">
+                            {user?.name?.charAt(0) || 'U'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate font-body">
+                          {user?.name}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate font-body">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu Items */}
+                  <div className="py-2">
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                      className="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+                    >
+                      <User className="w-4 h-4" />
+                      <span className="text-sm font-medium font-body">View Profile</span>
+                    </Link>
+                    
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                      className="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span className="text-sm font-medium font-body">Settings</span>
+                    </Link>
+
+                    {user?.profile_data?.onboarding_completed === false && (
+                      <Link
+                        to="/onboarding"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="flex items-center space-x-3 px-4 py-3 text-indigo-600 hover:bg-indigo-50 transition-colors duration-200"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        <span className="text-sm font-medium font-body">Complete Setup</span>
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Logout */}
+                  <div className="border-t border-slate-200/50 pt-2">
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="flex items-center space-x-3 px-4 py-3 w-full text-left text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm font-medium font-body">Logout</span>
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
