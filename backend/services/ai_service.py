@@ -1,13 +1,26 @@
-import google.generativeai as genai
 import os
 from datetime import datetime
 import re
 
-# Configure Gemini API
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-
-# Initialize the model
-model = genai.GenerativeModel('gemini-pro')
+# Optional AI import - graceful fallback if not available
+try:
+    import google.generativeai as genai
+    
+    # Configure Gemini API
+    api_key = os.getenv('GEMINI_API_KEY')
+    if api_key:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-pro')
+        AI_AVAILABLE = True
+    else:
+        AI_AVAILABLE = False
+        model = None
+        print("⚠️  GEMINI_API_KEY not provided - AI features will be disabled")
+        
+except ImportError:
+    AI_AVAILABLE = False
+    model = None
+    print("⚠️  google-generativeai not installed - AI features will be disabled")
 
 # Crisis detection keywords
 CRISIS_KEYWORDS = [
@@ -46,6 +59,15 @@ def get_ai_response(content, mood='', user_id=None):
                 'response': CRISIS_RESOURCES['message'],
                 'resources': CRISIS_RESOURCES['resources'],
                 'is_crisis': True,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+        
+        # Check if AI is available
+        if not AI_AVAILABLE or model is None:
+            return {
+                'response': "Thank you for sharing your thoughts. While our AI assistant is currently unavailable, please know that your feelings are valid and important. Consider reaching out to a trusted friend, family member, or mental health professional if you need support.",
+                'is_crisis': False,
+                'ai_available': False,
                 'timestamp': datetime.utcnow().isoformat()
             }
         
