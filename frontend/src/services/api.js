@@ -162,6 +162,10 @@ export const socialAPI = {
   
   deleteComment: (commentId) => 
     api.delete(`/social/vent/comments/${commentId}`).then(res => res.data),
+  
+  // Mood Heatmap API
+  getMoodHeatmap: () => 
+    api.get('/social/mood-heatmap').then(res => res.data),
 };
 
 // Music API

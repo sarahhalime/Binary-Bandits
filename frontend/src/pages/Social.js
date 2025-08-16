@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { socialAPI, authAPI } from '../services/api';
 import VentWall from '../components/VentWall';
+import MoodHeatmap from '../components/MoodHeatmap';
 import { 
   Users, 
   UserPlus, 
@@ -9,7 +10,8 @@ import {
   MessageCircle,
   Send,
   Copy,
-  CheckCircle
+  CheckCircle,
+  Map
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -94,7 +96,8 @@ const Social = () => {
 
   const tabs = [
     { id: 'friends', label: 'Friends', icon: Users },
-    { id: 'vent', label: 'Vent Wall', icon: MessageCircle }
+    { id: 'vent', label: 'Vent Wall', icon: MessageCircle },
+    { id: 'heatmap', label: 'Mood Map', icon: Map }
   ];
 
   return (
@@ -333,6 +336,18 @@ const Social = () => {
             transition={{ duration: 0.3 }}
           >
             <VentWall />
+          </motion.div>
+        )}
+
+        {activeTab === 'heatmap' && (
+          <motion.div
+            key="heatmap"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <MoodHeatmap />
           </motion.div>
         )}
       </AnimatePresence>
