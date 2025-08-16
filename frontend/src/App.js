@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import { useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -13,6 +14,7 @@ import Social from './pages/Social';
 import Profile from './pages/Profile';
 import OnboardingFlow from './components/OnboardingFlow';
 import Dashboard from './pages/Dashboard';
+import MoodGate from './pages/MoodGate';
 import './index.css';
 
 // Protected Route Component
@@ -46,7 +48,11 @@ const PublicRoute = ({ children }) => {
 };
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const pathname = window.location.pathname;
+  // Show Navbar if user is logged in, except while on /mood-gate
+  const showNavbar = user && pathname !== '/mood-gate';
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -55,65 +61,37 @@ function AppContent() {
         <div className="absolute top-0 left-0 w-full h-full bg-pattern opacity-20" />
         <div className="absolute top-0 left-0 w-full h-full bg-mesh opacity-10" />
       </div>
-      
-      {user && <Navbar />}
-      <main className={user ? 'pt-16' : ''}>
+      {showNavbar && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 50 }}>
+          <Navbar>
+            <div style={{ position: 'absolute', top: 0, right: 0, padding: '1rem' }}>
+              {/* Sign in/out button logic */}
+              {user ? (
+                <button onClick={signOut} className="bg-white rounded-full px-4 py-2 shadow-md font-semibold text-purple-600 hover:bg-purple-50 transition">Sign Out</button>
+              ) : (
+                <button onClick={() => navigate('/login')} className="bg-white rounded-full px-4 py-2 shadow-md font-semibold text-purple-600 hover:bg-purple-50 transition">Sign In</button>
+              )}
+            </div>
+          </Navbar>
+        </div>
+      )}
+      <main className={showNavbar ? 'pt-16' : ''}>
         <Routes>
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          } />
-          <Route path="/login" element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } />
-          <Route path="/register" element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          } />
-          <Route path="/music" element={
-            <ProtectedRoute>
-              <Music />
-            </ProtectedRoute>
-          } />
-          <Route path="/journal" element={
-            <ProtectedRoute>
-              <Journal />
-            </ProtectedRoute>
-          } />
-          <Route path="/activities" element={
-            <ProtectedRoute>
-              <Activities />
-            </ProtectedRoute>
-          } />
-          <Route path="/social" element={
-            <ProtectedRoute>
-              <Social />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/onboarding" element={
-            <ProtectedRoute>
-              <OnboardingFlow />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/mood-gate" element={<ProtectedRoute><MoodGate /></ProtectedRoute>} />
+          <Route path="/music" element={<ProtectedRoute><Music /></ProtectedRoute>} />
+          <Route path="/journal" element={<ProtectedRoute><Journal /></ProtectedRoute>} />
+          <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+          <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/onboarding" element={<ProtectedRoute><OnboardingFlow /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>
       </main>
-      
-      <Toaster
-        position="top-right"
+       <Toaster
+         position="bottom-right"
         toastOptions={{
           duration: 4000,
           style: {

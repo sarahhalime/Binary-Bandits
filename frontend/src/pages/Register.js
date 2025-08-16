@@ -89,7 +89,7 @@ const Register = () => {
         name: formData.name
       });
       if (result.success) {
-        navigate('/');
+        navigate('/mood-gate'); // Show mood question first
       }
     } catch (error) {
       console.error('Registration error:', error);

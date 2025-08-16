@@ -61,7 +61,7 @@ const Login = () => {
     try {
       const result = await login(formData.email, formData.password);
       if (result.success) {
-        navigate('/');
+        navigate('/mood-gate'); // Show mood question first
       }
     } catch (error) {
       console.error('Login error:', error);
