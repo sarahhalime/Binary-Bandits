@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { journalAPI } from '../services/api';
+import { api } from '../lib/api';
+import VoiceToggle from '../components/VoiceToggle';
+import AiReplyCard from '../components/AiReplyCard';
 import { 
   BookOpen, 
   Plus, 
@@ -15,7 +17,7 @@ import toast from 'react-hot-toast';
 const Journal = () => {
   const [entries, setEntries] = useState([]);
   const [currentEntry, setCurrentEntry] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
+  const [aiResponse, setAiResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedMood, setSelectedMood] = useState('');
@@ -35,7 +37,7 @@ const Journal = () => {
 
   const loadEntries = async () => {
     try {
-      const response = await journalAPI.getEntries();
+      const response = await api.journal.getEntries();
       setEntries(response.entries || []);
     } catch (error) {
       console.error('Error loading entries:', error);
@@ -48,15 +50,11 @@ const Journal = () => {
 
     setLoading(true);
     try {
-      await journalAPI.createEntry({
-        content: currentEntry,
-        mood: selectedMood,
-        title: `Journal Entry - ${new Date().toLocaleDateString()}`
-      });
-
+      const response = await api.journal.create(currentEntry);
       setCurrentEntry('');
       setSelectedMood('');
-      toast.success('Journal entry saved successfully!');
+      setAiResponse(response.ai);
+      toast.success('Journal entry saved with AI analysis!');
       loadEntries();
     } catch (error) {
       toast.error('Failed to save entry. Please try again.');
@@ -73,8 +71,8 @@ const Journal = () => {
 
     setAiLoading(true);
     try {
-      const response = await journalAPI.getAIResponse(currentEntry, selectedMood);
-      setAiResponse(response.ai_response);
+      const response = await api.journal.create(currentEntry);
+      setAiResponse(response.ai);
     } catch (error) {
       toast.error('Failed to get AI response. Please try again.');
     } finally {
@@ -140,9 +138,15 @@ const Journal = () => {
 
             {/* Journal Entry */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What's on your mind?
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  What's on your mind?
+                </label>
+                <VoiceToggle 
+                  onChangeDraft={setCurrentEntry}
+                  disabled={loading || aiLoading}
+                />
+              </div>
               <textarea
                 value={currentEntry}
                 onChange={(e) => setCurrentEntry(e.target.value)}
@@ -177,7 +181,7 @@ const Journal = () => {
                 }`}
               >
                 <MessageCircle className="mr-2" size={16} />
-                {aiLoading ? 'Getting Response...' : 'AI Response'}
+                {aiLoading ? 'Getting Response...' : 'Get Supportive Reply'}
               </motion.button>
             </div>
           </form>
@@ -198,14 +202,13 @@ const Journal = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-4 bg-gradient-to-r from-calm-50 to-primary-50 rounded-lg border border-calm-200"
             >
-              <p className="text-gray-800 leading-relaxed">{aiResponse}</p>
+              <AiReplyCard {...aiResponse} />
             </motion.div>
           ) : (
             <div className="text-center py-12 text-gray-500">
               <MessageCircle className="mx-auto mb-4 text-gray-300" size={48} />
-              <p>Click "AI Response" to get empathetic feedback on your entry</p>
+              <p>Click "Get Supportive Reply" to get empathetic feedback on your entry</p>
             </div>
           )}
         </motion.div>

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.database import get_db
-from services.ai_service import get_ai_response
+from services.ai_provider import analyze_and_reply
 from datetime import datetime, timedelta
 from bson import ObjectId
 
@@ -9,7 +9,7 @@ journal_bp = Blueprint('journal', __name__)
 
 @journal_bp.route('/entry', methods=['POST'])
 @jwt_required()
-def create_journal_entry():
+def create_journal_entry_old():
     """Create a new journal entry"""
     try:
         user_id = get_jwt_identity()
@@ -56,7 +56,7 @@ def create_journal_entry():
 
 @journal_bp.route('/entries', methods=['GET'])
 @jwt_required()
-def get_journal_entries():
+def get_journal_entries_old():
     """Get user's journal entries"""
     try:
         user_id = get_jwt_identity()
@@ -140,7 +140,7 @@ def get_journal_entries():
 
 @journal_bp.route('/entry/<entry_id>', methods=['GET'])
 @jwt_required()
-def get_journal_entry(entry_id):
+def get_journal_entry_old(entry_id):
     """Get a specific journal entry"""
     try:
         user_id = get_jwt_identity()
@@ -168,7 +168,7 @@ def get_journal_entry(entry_id):
 
 @journal_bp.route('/entry/<entry_id>', methods=['PUT'])
 @jwt_required()
-def update_journal_entry(entry_id):
+def update_journal_entry_old(entry_id):
     """Update a journal entry"""
     try:
         user_id = get_jwt_identity()
@@ -214,7 +214,7 @@ def update_journal_entry(entry_id):
 
 @journal_bp.route('/entry/<entry_id>', methods=['DELETE'])
 @jwt_required()
-def delete_journal_entry(entry_id):
+def delete_journal_entry_old(entry_id):
     """Delete a journal entry"""
     try:
         user_id = get_jwt_identity()
@@ -239,6 +239,95 @@ def delete_journal_entry(entry_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@journal_bp.route('/', methods=['POST'])
+def create_journal_entry():
+    """Create a new journal entry with AI analysis"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('text'):
+            return jsonify({'error': 'Journal text is required'}), 400
+        
+        text = data['text']
+        user_id = None  # For now, no auth required
+        
+        # Get AI analysis and reply
+        ai_analysis = analyze_and_reply(text)
+        
+        # Create journal entry
+        journal_entry = {
+            'user_id': user_id,
+            'text': text,
+            'created_at': datetime.utcnow(),
+            'ai': ai_analysis
+        }
+        
+        db = get_db()
+        if db is not None:
+            result = db.journal_entries.insert_one(journal_entry)
+            journal_entry['id'] = str(result.inserted_id)
+            # Remove _id field to avoid JSON serialization issues
+            if '_id' in journal_entry:
+                del journal_entry['_id']
+        else:
+            # Demo mode
+            journal_entry['id'] = f"demo_entry_{datetime.utcnow().timestamp()}"
+        
+        return jsonify(journal_entry), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@journal_bp.route('/', methods=['GET'])
+def get_journal_entries():
+    """Get latest journal entries"""
+    try:
+        limit = request.args.get('limit', 20, type=int)
+        user_id = None  # For now, no auth required
+        
+        db = get_db()
+        if db is not None:
+            entries = list(db.journal_entries.find({
+                'user_id': user_id
+            }).sort('created_at', -1).limit(limit))
+            
+            # Convert ObjectId to string
+            for entry in entries:
+                entry['id'] = str(entry['_id'])
+                entry['created_at'] = entry['created_at'].isoformat()
+                del entry['_id']
+        else:
+            # Demo mode - return sample entries
+            entries = [
+                {
+                    'id': 'demo_entry_1',
+                    'text': 'Today I woke up feeling refreshed and calm. The morning sunlight streaming through my window reminded me to appreciate the simple moments in life.',
+                    'created_at': datetime.utcnow().isoformat(),
+                    'ai': {
+                        'emotion': 'calm',
+                        'intensity': 2,
+                        'risk': 'none',
+                        'summary': 'Feeling peaceful and grateful',
+                        'reply': 'It sounds like you\'re experiencing a beautiful moment of mindfulness. The way you\'re appreciating the simple things shows real emotional awareness.',
+                        'micro_action': {'type': 'breathing', 'duration_sec': 60}
+                    }
+                }
+            ]
+        
+        return jsonify({
+            'entries': entries,
+            'pagination': {
+                'page': 1,
+                'limit': limit,
+                'total': len(entries),
+                'pages': 1
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @journal_bp.route('/ai-response', methods=['POST'])
 @jwt_required()
 def get_ai_therapy_response():
@@ -255,8 +344,8 @@ def get_ai_therapy_response():
         mood = data.get('mood', '')
         entry_id = data.get('entry_id')
         
-        # Generate AI response
-        ai_response = get_ai_response(content, mood, user_id)
+        # Generate AI response using new provider
+        ai_response = analyze_and_reply(content)
         
         # If entry_id is provided, save the AI response
         if entry_id:
@@ -275,7 +364,7 @@ def get_ai_therapy_response():
 
 @journal_bp.route('/stats', methods=['GET'])
 @jwt_required()
-def get_journal_stats():
+def get_journal_stats_old():
     """Get journal statistics"""
     try:
         user_id = get_jwt_identity()

@@ -1,0 +1,212 @@
+[
+  {
+    "id": "box_breath_5",
+    "title": "Box breathing (5 min)",
+    "mood_targets": ["anxious", "overwhelmed", "stressed"],
+    "energy": "low",
+    "duration_min": 5,
+    "context": ["any"],
+    "steps": ["Inhale 4s", "Hold 4s", "Exhale 4s", "Hold 4s"],
+    "xp_reward": 10
+  },
+  {
+    "id": "progressive_relaxation_10",
+    "title": "Progressive muscle relaxation",
+    "mood_targets": ["anxious", "stressed", "overwhelmed"],
+    "energy": "low",
+    "duration_min": 10,
+    "context": ["home"],
+    "steps": ["Tense and relax each muscle group", "Start from toes, work up to head", "Hold tension 5s, release 10s"],
+    "xp_reward": 15
+  },
+  {
+    "id": "mindful_walk_15",
+    "title": "Mindful walking",
+    "mood_targets": ["restless", "anxious", "overwhelmed"],
+    "energy": "med",
+    "duration_min": 15,
+    "context": ["outside"],
+    "steps": ["Walk slowly", "Notice each step", "Feel the ground beneath you", "Observe surroundings without judgment"],
+    "xp_reward": 20
+  },
+  {
+    "id": "gratitude_journal_5",
+    "title": "Gratitude journaling",
+    "mood_targets": ["low", "sad", "overwhelmed"],
+    "energy": "low",
+    "duration_min": 5,
+    "context": ["any"],
+    "steps": ["Write 3 things you're grateful for", "Be specific", "Feel the gratitude"],
+    "xp_reward": 12
+  },
+  {
+    "id": "dance_break_5",
+    "title": "Dance break",
+    "mood_targets": ["low", "restless"],
+    "energy": "high",
+    "duration_min": 5,
+    "context": ["home"],
+    "steps": ["Put on upbeat music", "Move freely", "Let your body guide you", "No judgment, just move"],
+    "xp_reward": 15
+  },
+  {
+    "id": "stretching_10",
+    "title": "Gentle stretching",
+    "mood_targets": ["restless", "stressed", "anxious"],
+    "energy": "low",
+    "duration_min": 10,
+    "context": ["any"],
+    "steps": ["Cat-cow stretches", "Child's pose", "Gentle twists", "Hold each pose 30s"],
+    "xp_reward": 12
+  },
+  {
+    "id": "cold_shower_3",
+    "title": "Cold shower (3 min)",
+    "mood_targets": ["low", "restless", "overwhelmed"],
+    "energy": "high",
+    "duration_min": 3,
+    "context": ["home"],
+    "steps": ["Start warm", "Gradually reduce temperature", "Focus on breathing", "Feel the sensation"],
+    "xp_reward": 25
+  },
+  {
+    "id": "meditation_10",
+    "title": "Mindfulness meditation",
+    "mood_targets": ["anxious", "stressed", "overwhelmed"],
+    "energy": "low",
+    "duration_min": 10,
+    "context": ["any"],
+    "steps": ["Sit comfortably", "Focus on breath", "When mind wanders, return to breath", "Be kind to yourself"],
+    "xp_reward": 18
+  },
+  {
+    "id": "nature_connection_20",
+    "title": "Nature connection",
+    "mood_targets": ["low", "overwhelmed", "stressed"],
+    "energy": "med",
+    "duration_min": 20,
+    "context": ["outside"],
+    "steps": ["Find a natural space", "Sit quietly", "Observe nature", "Feel connected"],
+    "xp_reward": 25
+  },
+  {
+    "id": "creative_expression_15",
+    "title": "Creative expression",
+    "mood_targets": ["low", "restless", "overwhelmed"],
+    "energy": "med",
+    "duration_min": 15,
+    "context": ["home"],
+    "steps": ["Draw, paint, or write", "No pressure to create art", "Express what you feel", "Let it flow"],
+    "xp_reward": 20
+  },
+  {
+    "id": "self_massage_8",
+    "title": "Self-massage",
+    "mood_targets": ["stressed", "anxious", "overwhelmed"],
+    "energy": "low",
+    "duration_min": 8,
+    "context": ["home"],
+    "steps": ["Massage temples", "Rub shoulders", "Press acupressure points", "Feel the tension release"],
+    "xp_reward": 12
+  },
+  {
+    "id": "power_pose_2",
+    "title": "Power pose (2 min)",
+    "mood_targets": ["low", "anxious"],
+    "energy": "med",
+    "duration_min": 2,
+    "context": ["any"],
+    "steps": ["Stand tall", "Hands on hips", "Chest open", "Hold for 2 minutes"],
+    "xp_reward": 8
+  },
+  {
+    "id": "laugh_break_5",
+    "title": "Laughter break",
+    "mood_targets": ["low", "sad", "stressed"],
+    "energy": "high",
+    "duration_min": 5,
+    "context": ["any"],
+    "steps": ["Watch funny video", "Call funny friend", "Remember funny moment", "Let yourself laugh"],
+    "xp_reward": 15
+  },
+  {
+    "id": "sensory_grounding_5",
+    "title": "5-4-3-2-1 grounding",
+    "mood_targets": ["anxious", "overwhelmed", "restless"],
+    "energy": "low",
+    "duration_min": 5,
+    "context": ["any"],
+    "steps": ["5 things you see", "4 things you touch", "3 things you hear", "2 things you smell", "1 thing you taste"],
+    "xp_reward": 10
+  },
+  {
+    "id": "gentle_yoga_15",
+    "title": "Gentle yoga flow",
+    "mood_targets": ["stressed", "anxious", "restless"],
+    "energy": "med",
+    "duration_min": 15,
+    "context": ["home"],
+    "steps": ["Sun salutation", "Warrior poses", "Tree pose", "Savasana"],
+    "xp_reward": 18
+  },
+  {
+    "id": "music_therapy_10",
+    "title": "Music therapy",
+    "mood_targets": ["low", "sad", "overwhelmed"],
+    "energy": "low",
+    "duration_min": 10,
+    "context": ["any"],
+    "steps": ["Choose calming music", "Close eyes", "Focus on melody", "Let emotions flow"],
+    "xp_reward": 12
+  },
+  {
+    "id": "social_connection_15",
+    "title": "Social connection",
+    "mood_targets": ["low", "sad", "overwhelmed"],
+    "energy": "med",
+    "duration_min": 15,
+    "context": ["any"],
+    "steps": ["Call a friend", "Send supportive message", "Share how you feel", "Listen to them"],
+    "xp_reward": 20
+  },
+  {
+    "id": "declutter_20",
+    "title": "Quick declutter",
+    "mood_targets": ["overwhelmed", "restless", "anxious"],
+    "energy": "med",
+    "duration_min": 20,
+    "context": ["home"],
+    "steps": ["Choose one small area", "Remove 10 items", "Organize what remains", "Feel the space open up"],
+    "xp_reward": 25
+  },
+  {
+    "id": "breathing_3",
+    "title": "Deep breathing (3 min)",
+    "mood_targets": ["anxious", "stressed", "overwhelmed"],
+    "energy": "low",
+    "duration_min": 3,
+    "context": ["any"],
+    "steps": ["Inhale deeply 4s", "Hold 4s", "Exhale slowly 6s", "Repeat"],
+    "xp_reward": 8
+  },
+  {
+    "id": "positive_affirmations_5",
+    "title": "Positive affirmations",
+    "mood_targets": ["low", "sad", "anxious"],
+    "energy": "low",
+    "duration_min": 5,
+    "context": ["any"],
+    "steps": ["Choose 3 affirmations", "Say them aloud", "Feel them in your body", "Believe them"],
+    "xp_reward": 10
+  },
+  {
+    "id": "mindful_eating_10",
+    "title": "Mindful eating",
+    "mood_targets": ["restless", "anxious", "overwhelmed"],
+    "energy": "low",
+    "duration_min": 10,
+    "context": ["any"],
+    "steps": ["Choose a small snack", "Observe it with all senses", "Eat slowly", "Savor each bite"],
+    "xp_reward": 12
+  }
+]

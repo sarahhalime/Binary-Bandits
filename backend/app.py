@@ -13,6 +13,7 @@ from routes.activities import activities_bp
 from routes.social import social_bp
 from routes.music import music_bp
 from routes.profile import profile_bp
+from routes.voice import voice_bp
 
 # Import database
 from models.database import init_db
@@ -26,9 +27,10 @@ app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'your-secret-key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 app.config['MONGODB_URI'] = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/mindful_harmony')
+app.config['MONGO_DB'] = os.getenv('MONGO_DB', 'ignition')
 
 # Initialize extensions
-CORS(app, origins=['http://localhost:3000', 'http://localhost:3001'], supports_credentials=True)
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"]}}, supports_credentials=True)
 jwt = JWTManager(app)
 
 # Initialize database
@@ -42,6 +44,7 @@ app.register_blueprint(activities_bp, url_prefix='/api/activities')
 app.register_blueprint(social_bp, url_prefix='/api/social')
 app.register_blueprint(music_bp, url_prefix='/api/music')
 app.register_blueprint(profile_bp, url_prefix='/api/profile')
+app.register_blueprint(voice_bp, url_prefix='/api/voice')
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -51,6 +54,20 @@ def health_check():
         'timestamp': datetime.utcnow().isoformat(),
         'message': 'Mindful Harmony API is running'
     })
+
+@app.route('/api/health/db', methods=['GET'])
+def health_check_db():
+    """Database health check endpoint"""
+    try:
+        db = get_db()
+        if db is not None:
+            # Test database connection
+            db.command('ping')
+            return jsonify({'db': 'ok'}), 200
+        else:
+            return jsonify({'db': 'demo_mode'}), 200
+    except Exception as e:
+        return jsonify({'db': 'error', 'message': str(e)}), 500
 
 @app.errorhandler(404)
 def not_found(error):

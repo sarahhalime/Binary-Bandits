@@ -4,19 +4,21 @@ A comprehensive mental health web application that combines mood tracking, AI th
 
 ## Features
 
+- **Journal AI Therapy / Venting to AI**: Intelligent journaling with empathetic AI responses using OpenAI GPT-4o-mini or Google Gemini
+- **Voice Toggle Mode**: Speech-to-text functionality using Web Speech API and OpenAI Whisper
+- **Mood-to-Activity Recommender**: Personalized activity suggestions based on mood, energy, time, and context
 - **Mood-to-Music**: AI-powered playlist generation based on mood
-- **Journal + AI Therapy**: Intelligent journaling with empathetic AI responses
-- **Mood-to-Activity Recommender**: Personalized activity suggestions
 - **Social Support**: Connect with friends and send supportive nudges
 - **Profile & Biometrics**: User profiles with optional health tracking
 - **Mood History**: Visualize mood trends over time
 
 ## Tech Stack
 
-- **Frontend**: React.js with modern UI/UX
+- **Frontend**: React.js with Tailwind CSS and Framer Motion
 - **Backend**: Flask (Python) REST API
-- **Database**: MongoDB
-- **AI**: Gemini API for sentiment analysis and text generation
+- **Database**: MongoDB Atlas
+- **AI**: OpenAI GPT-4o-mini and Google Gemini for sentiment analysis and text generation
+- **Voice**: Web Speech API and OpenAI Whisper for speech-to-text
 - **Music**: Spotify Web API integration
 - **Authentication**: JWT tokens
 
@@ -25,8 +27,9 @@ A comprehensive mental health web application that combines mood tracking, AI th
 ### Prerequisites
 - Node.js (v16+)
 - Python (v3.8+)
-- MongoDB
+- MongoDB Atlas account
 - Spotify Developer Account
+- OpenAI API key (for GPT-4o-mini and Whisper)
 - Google AI Studio Account (for Gemini API)
 
 ### Installation
@@ -56,29 +59,47 @@ Create `.env` files in both `backend/` and `frontend/` directories:
 
 **Backend (.env):**
 ```
-MONGODB_URI=mongodb://localhost:27017/mindful_harmony
+# Database Configuration
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
+MONGO_DB=ignition
+
+# JWT Configuration
 JWT_SECRET=your_jwt_secret_here
+
+# AI Provider Configuration
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_openai_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Spotify API Configuration
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-GEMINI_API_KEY=your_gemini_api_key
+
+# Flask Configuration
+FLASK_ENV=development
+FLASK_DEBUG=True
 ```
 
 **Frontend (.env):**
 ```
-REACT_APP_API_URL=http://localhost:5000/api
-REACT_APP_SPOTIFY_CLIENT_ID=your_spotify_client_id
+REACT_APP_API_BASE=http://localhost:5001
 ```
 
 5. **Run the Application**
 ```bash
 # Terminal 1 - Backend
 cd backend
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 python app.py
 
 # Terminal 2 - Frontend
 cd frontend
 npm start
 ```
+
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5001
 
 ## API Endpoints
 
@@ -93,9 +114,17 @@ npm start
 - `POST /api/music/generate` - Generate mood-based playlist
 
 ### Journal
-- `POST /api/journal/entry` - Create journal entry
-- `GET /api/journal/entries` - Get journal entries
+- `POST /api/journal` - Create journal entry with AI analysis
+- `GET /api/journal` - Get journal entries
 - `POST /api/journal/ai-response` - Get AI therapy response
+
+### Activities
+- `POST /api/activities/recommendations/activities` - Get activity recommendations
+- `POST /api/activities/complete` - Mark activity as completed
+- `GET /api/activities/history` - Get activity history
+
+### Voice
+- `POST /api/voice/transcribe` - Transcribe audio using OpenAI Whisper
 
 ### Activities
 - `GET /api/activities/recommend` - Get activity recommendations
