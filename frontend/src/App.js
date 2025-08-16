@@ -12,6 +12,7 @@ import Activities from './pages/Activities';
 import Social from './pages/Social';
 import Profile from './pages/Profile';
 import OnboardingFlow from './components/OnboardingFlow';
+import Dashboard from './pages/Dashboard';
 import './index.css';
 
 // Protected Route Component
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="spinner"></div>
       </div>
     );
@@ -35,7 +36,7 @@ const PublicRoute = ({ children }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="spinner"></div>
       </div>
     );
@@ -48,7 +49,13 @@ function AppContent() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-calm-50 to-primary-50">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-pattern opacity-20" />
+        <div className="absolute top-0 left-0 w-full h-full bg-mesh opacity-10" />
+      </div>
+      
       {user && <Navbar />}
       <main className={user ? 'pt-16' : ''}>
         <Routes>
@@ -97,6 +104,11 @@ function AppContent() {
               <OnboardingFlow />
             </ProtectedRoute>
           } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </main>
       
@@ -113,7 +125,7 @@ function AppContent() {
           },
           success: {
             iconTheme: {
-              primary: '#14b8a6',
+              primary: '#6366f1',
               secondary: '#ffffff',
             },
           },

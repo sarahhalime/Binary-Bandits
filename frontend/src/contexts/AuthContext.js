@@ -49,12 +49,10 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await axios.post('/auth/login', { email, password });
-      const { token, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const { access_token, user } = response.data;
+      localStorage.setItem('token', access_token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       setUser(user);
-      
       toast.success(`Welcome back, ${user.name}!`);
       return { success: true };
     } catch (error) {
@@ -70,12 +68,10 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await axios.post('/auth/register', userData);
-      const { token, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const { access_token, user } = response.data;
+      localStorage.setItem('token', access_token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       setUser(user);
-      
       toast.success(`Welcome to Mindful Harmony, ${user.name}!`);
       return { success: true };
     } catch (error) {
