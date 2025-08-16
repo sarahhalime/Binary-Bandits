@@ -119,9 +119,19 @@ function AppContent() {
               <Social />
             </ProtectedRoute>
           } />
+          <Route path="/mood-map" element={
+            <ProtectedRoute>
+              <MoodMap />
+            </ProtectedRoute>
+          } />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           } />
           <Route path="/onboarding" element={
