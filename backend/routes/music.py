@@ -212,9 +212,12 @@ def create_spotify_playlist():
             )
             access_token = new_token_info['access_token']
         
-        # Generate playlist tracks
-        playlist_data = spotify_service.generate_mood_playlist(mood, intensity, limit)
+        # Generate playlist tracks using user's access token
+        playlist_data = spotify_service.generate_mood_playlist(mood, intensity, limit, access_token)
         tracks = playlist_data.get('tracks', [])
+        print(f"Debug - Generated {len(tracks)} tracks from mood playlist")
+        for i, track in enumerate(tracks[:3]):  # Show first 3 tracks
+            print(f"Debug - Generated track {i}: {track.get('name')} by {track.get('artist')} (ID: {track.get('id')})")
         
         # Create playlist in Spotify
         result = spotify_service.create_spotify_playlist(access_token, mood, intensity, tracks)

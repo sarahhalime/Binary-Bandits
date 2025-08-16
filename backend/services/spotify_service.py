@@ -47,6 +47,7 @@ class SpotifyService:
         self.mood_mappings = {
             'happy': {
                 'genres': ['pop', 'dance', 'happy', 'summer'],
+                'keywords': ['upbeat', 'cheerful', 'happy', 'positive'],
                 'audio_features': {
                     'valence': (0.7, 1.0),
                     'energy': (0.6, 1.0),
@@ -55,6 +56,7 @@ class SpotifyService:
             },
             'sad': {
                 'genres': ['sad', 'melancholy', 'indie', 'acoustic'],
+                'keywords': ['melancholy', 'emotional', 'sad', 'heartbreak'],
                 'audio_features': {
                     'valence': (0.0, 0.4),
                     'energy': (0.0, 0.5),
@@ -63,6 +65,7 @@ class SpotifyService:
             },
             'anxious': {
                 'genres': ['ambient', 'chill', 'meditation', 'nature'],
+                'keywords': ['relaxing', 'peaceful', 'calm', 'meditation'],
                 'audio_features': {
                     'valence': (0.3, 0.7),
                     'energy': (0.0, 0.4),
@@ -71,6 +74,7 @@ class SpotifyService:
             },
             'angry': {
                 'genres': ['rock', 'metal', 'punk', 'electronic'],
+                'keywords': ['aggressive', 'intense', 'powerful', 'fierce'],
                 'audio_features': {
                     'valence': (0.0, 0.5),
                     'energy': (0.7, 1.0),
@@ -79,6 +83,7 @@ class SpotifyService:
             },
             'calm': {
                 'genres': ['ambient', 'chill', 'jazz', 'classical'],
+                'keywords': ['relaxing', 'peaceful', 'calm', 'meditation'],
                 'audio_features': {
                     'valence': (0.4, 0.8),
                     'energy': (0.0, 0.3),
@@ -87,6 +92,7 @@ class SpotifyService:
             },
             'energetic': {
                 'genres': ['dance', 'electronic', 'pop', 'rock'],
+                'keywords': ['energetic', 'pump up', 'workout', 'intense'],
                 'audio_features': {
                     'valence': (0.6, 1.0),
                     'energy': (0.8, 1.0),
@@ -95,6 +101,7 @@ class SpotifyService:
             },
             'romantic': {
                 'genres': ['r-n-b', 'soul', 'jazz', 'acoustic'],
+                'keywords': ['romantic', 'love', 'intimate', 'valentine'],
                 'audio_features': {
                     'valence': (0.5, 0.9),
                     'energy': (0.2, 0.6),
@@ -103,33 +110,88 @@ class SpotifyService:
             }
         }
     
-    def generate_mood_playlist(self, mood, intensity=5, limit=20):
-        """Generate a playlist based on mood and intensity"""
+    def generate_mood_playlist(self, mood, intensity=5, limit=20, access_token=None):
+        """Generate a playlist based on mood and intensity using Search API (since Recommendations API is blocked)"""
         if not self.spotify_available:
             return self._get_fallback_playlist(mood, intensity, limit)
             
         try:
+            # Use user's access token if provided, otherwise use client credentials
+            if access_token:
+                sp_client = spotipy.Spotify(auth=access_token)
+                print(f"Debug - Using user access token for search")
+            else:
+                sp_client = self.sp
+                print(f"Debug - Using client credentials for search")
+            
             # Get mood mapping
             mood_config = self.mood_mappings.get(mood.lower(), self.mood_mappings['calm'])
+            print(f"Debug - Mood config: {mood_config}")
             
-            # Adjust audio features based on intensity
-            audio_features = self._adjust_features_for_intensity(mood_config['audio_features'], intensity)
+            # Since Recommendations API is blocked for new apps, use Search API instead
+            print(f"Debug - Using Search API instead of Recommendations (which is blocked for new apps)")
             
-            # Get seed genres
-            seed_genres = self._get_seed_genres(mood_config['genres'])
+            # Create search queries based on mood and genres
+            search_queries = []
+            mood_genres = mood_config['genres']
+            mood_keywords = mood_config.get('keywords', [mood])
             
-            # Get recommendations
-            recommendations = self.sp.recommendations(
-                seed_genres=seed_genres[:5],  # Spotify allows max 5 seed genres
-                target_valence=audio_features['valence'][0],
-                target_energy=audio_features['energy'][0],
-                target_tempo=audio_features['tempo'][0],
-                limit=limit
-            )
+            # Create diverse search queries
+            for genre in mood_genres[:3]:  # Limit to 3 genres to avoid too many queries
+                search_queries.append(f"genre:{genre}")
+                
+            for keyword in mood_keywords[:2]:  # Add mood-based keywords
+                search_queries.append(f"{keyword}")
+            
+            # Add some popular artists for this mood
+            if mood.lower() in ['happy', 'energetic']:
+                search_queries.extend(['artist:Dua Lipa', 'artist:Bruno Mars', 'artist:Pharrell'])
+            elif mood.lower() in ['sad', 'melancholy']:
+                search_queries.extend(['artist:Adele', 'artist:Billie Eilish', 'artist:Radiohead'])
+            elif mood.lower() in ['calm', 'relaxed']:
+                search_queries.extend(['artist:Bon Iver', 'artist:Norah Jones', 'artist:Ludovico Einaudi'])
+            elif mood.lower() in ['romantic']:
+                search_queries.extend(['artist:Ed Sheeran', 'artist:John Legend', 'artist:Alicia Keys'])
+            else:
+                search_queries.extend(['artist:Coldplay', 'artist:The Beatles', 'artist:Taylor Swift'])
+                
+            print(f"Debug - Search queries: {search_queries}")
+            
+            # Collect tracks from multiple searches
+            all_tracks = []
+            tracks_per_query = max(1, limit // len(search_queries))
+            
+            for query in search_queries:
+                try:
+                    results = sp_client.search(q=query, type='track', limit=tracks_per_query)
+                    tracks = results.get('tracks', {}).get('items', [])
+                    print(f"Debug - Query '{query}' returned {len(tracks)} tracks")
+                    all_tracks.extend(tracks)
+                    
+                    if len(all_tracks) >= limit:
+                        break
+                        
+                except Exception as e:
+                    print(f"Debug - Search query '{query}' failed: {e}")
+                    continue
+            
+            # Remove duplicates and limit results
+            seen_ids = set()
+            unique_tracks = []
+            for track in all_tracks:
+                if track['id'] not in seen_ids and len(unique_tracks) < limit:
+                    seen_ids.add(track['id'])
+                    unique_tracks.append(track)
+            
+            print(f"Debug - Found {len(unique_tracks)} unique tracks after deduplication")
+            
+            if not unique_tracks:
+                print("Debug - No tracks found via search, using fallback")
+                return self._get_fallback_playlist(mood, intensity, limit)
             
             # Format tracks
             tracks = []
-            for track in recommendations['tracks']:
+            for track in unique_tracks:
                 track_info = {
                     'id': track['id'],
                     'name': track['name'],
@@ -151,8 +213,9 @@ class SpotifyService:
             }
             
         except Exception as e:
+            print(f"Debug - Search-based playlist generation failed: {e}")
             # Fallback to predefined playlists
-            return self._get_fallback_playlist(mood, limit)
+            return self._get_fallback_playlist(mood, intensity, limit)
     
     def search_tracks(self, query, limit=10):
         """Search for tracks"""
@@ -243,6 +306,56 @@ class SpotifyService:
         
         return adjusted_features
     
+    def _get_seed_genres_with_client(self, sp_client, target_genres):
+        """Get available seed genres that match target genres using specific client"""
+        try:
+            # Try different methods to get available genres
+            available_genres = None
+            
+            # Method 1: Try recommendation_genre_seeds (newer method)
+            try:
+                genre_data = sp_client.recommendation_genre_seeds()
+                available_genres = genre_data.get('genres', [])
+                print(f"Debug - Got genres using recommendation_genre_seeds: {len(available_genres)} genres")
+            except:
+                pass
+            
+            # Method 2: If that fails, try the client credentials object
+            if not available_genres and hasattr(self, 'sp') and self.sp:
+                try:
+                    genre_data = self.sp.recommendation_genre_seeds()
+                    available_genres = genre_data.get('genres', [])
+                    print(f"Debug - Got genres using client credentials: {len(available_genres)} genres")
+                except:
+                    pass
+            
+            # Method 3: If all else fails, use hardcoded common genres
+            if not available_genres:
+                available_genres = ['acoustic', 'afrobeat', 'alt-rock', 'alternative', 'ambient', 'blues', 'bossanova', 'brazil', 'breakbeat', 'british', 'chill', 'classical', 'club', 'country', 'dance', 'dancehall', 'deep-house', 'disco', 'drum-and-bass', 'dub', 'dubstep', 'electronic', 'folk', 'funk', 'garage', 'gospel', 'groove', 'grunge', 'hip-hop', 'house', 'indie', 'indie-pop', 'jazz', 'latino', 'pop', 'r-n-b', 'reggae', 'rock', 'soul', 'techno']
+                print(f"Debug - Using hardcoded genres: {len(available_genres)} genres")
+            
+            # Find matching genres
+            matching_genres = []
+            for target in target_genres:
+                for available in available_genres:
+                    if target in available or available in target:
+                        if available not in matching_genres:  # Avoid duplicates
+                            matching_genres.append(available)
+                            print(f"Debug - Matched '{target}' -> '{available}'")
+            
+            # If no matches found, return some default genres
+            if not matching_genres:
+                print(f"Debug - No matches for {target_genres}, using defaults")
+                matching_genres = ['pop', 'rock', 'alternative', 'indie', 'acoustic']
+            
+            final_genres = matching_genres[:5]  # Spotify allows max 5 seed genres
+            print(f"Debug - Final seed genres: {final_genres}")
+            return final_genres
+            
+        except Exception as e:
+            print(f"Error getting seed genres: {e}")
+            return ['pop', 'rock', 'alternative', 'indie', 'acoustic']
+    
     def _get_seed_genres(self, target_genres):
         """Get available seed genres that match target genres"""
         if not self.spotify_available:
@@ -250,19 +363,25 @@ class SpotifyService:
             
         try:
             available_genres = self.sp.recommendation_genres()['genres']
+            print(f"Debug - Available genres from Spotify: {len(available_genres)} genres")
             
             # Find matching genres
             matching_genres = []
             for target in target_genres:
                 for available in available_genres:
                     if target in available or available in target:
-                        matching_genres.append(available)
+                        if available not in matching_genres:  # Avoid duplicates
+                            matching_genres.append(available)
+                            print(f"Debug - Matched '{target}' -> '{available}'")
             
             # If no matches found, return some default genres
             if not matching_genres:
-                matching_genres = ['pop', 'rock', 'electronic', 'jazz', 'classical']
+                print(f"Debug - No matches for {target_genres}, using defaults")
+                matching_genres = ['pop', 'rock', 'alternative', 'indie', 'acoustic']
             
-            return matching_genres[:5]  # Spotify allows max 5 seed genres
+            final_genres = matching_genres[:5]  # Spotify allows max 5 seed genres
+            print(f"Debug - Final seed genres: {final_genres}")
+            return final_genres
             
         except Exception as e:
             return ['pop', 'rock', 'electronic', 'jazz', 'classical']
@@ -386,17 +505,30 @@ class SpotifyService:
             )
             
             # Add tracks to playlist if we have any
+            print(f"Debug - Total tracks received: {len(tracks) if tracks else 0}")
             if tracks:
                 track_uris = []
-                for track in tracks:
+                for i, track in enumerate(tracks):
+                    print(f"Debug - Track {i}: ID={track.get('id')}, Name={track.get('name')}")
                     if track.get('id') and not track['id'].startswith('fallback_'):
-                        track_uris.append(f"spotify:track:{track['id']}")
+                        track_uri = f"spotify:track:{track['id']}"
+                        track_uris.append(track_uri)
+                        print(f"Debug - Added URI: {track_uri}")
+                    else:
+                        print(f"Debug - Skipped track: {track.get('id')} (fallback or no ID)")
                 
+                print(f"Debug - Final track URIs count: {len(track_uris)}")
                 if track_uris:
                     # Add tracks in batches of 100 (Spotify limit)
                     for i in range(0, len(track_uris), 100):
                         batch = track_uris[i:i+100]
-                        sp_user.playlist_add_items(playlist['id'], batch)
+                        print(f"Debug - Adding batch of {len(batch)} tracks")
+                        result = sp_user.playlist_add_items(playlist['id'], batch)
+                        print(f"Debug - Batch add result: {result}")
+                else:
+                    print("Debug - No valid track URIs to add")
+            else:
+                print("Debug - No tracks provided to add")
             
             return {
                 'success': True,
