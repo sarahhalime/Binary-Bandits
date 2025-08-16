@@ -38,7 +38,12 @@ FRONTEND_URLS = [
 FRONTEND_URLS = [url for url in FRONTEND_URLS if url]
 
 # Initialize extensions
-CORS(app, origins=FRONTEND_URLS, supports_credentials=True)
+CORS(app, 
+     origins=FRONTEND_URLS, 
+     supports_credentials=True,
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
+     resources={r"/api/*": {"origins": FRONTEND_URLS}})
 jwt = JWTManager(app)
 
 # Initialize database
