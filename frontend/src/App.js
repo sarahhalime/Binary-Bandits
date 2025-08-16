@@ -11,7 +11,9 @@ import Music from './pages/Music';
 import Journal from './pages/Journal';
 import Activities from './pages/Activities';
 import Social from './pages/Social';
+import MoodMap from './pages/MoodMap';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import OnboardingFlow from './components/OnboardingFlow';
 import Dashboard from './pages/Dashboard';
 import MoodGate from './pages/MoodGate';
@@ -77,17 +79,61 @@ function AppContent() {
       )}
       <main className={showNavbar ? 'pt-16' : ''}>
         <Routes>
-          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-          <Route path="/mood-gate" element={<ProtectedRoute><MoodGate /></ProtectedRoute>} />
-          <Route path="/music" element={<ProtectedRoute><Music /></ProtectedRoute>} />
-          <Route path="/journal" element={<ProtectedRoute><Journal /></ProtectedRoute>} />
-          <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
-          <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/onboarding" element={<ProtectedRoute><OnboardingFlow /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
+          <Route path="/login" element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } />
+          <Route path="/register" element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } />
+          <Route path="/mood-gate" element={
+            <ProtectedRoute>
+              <MoodGate />
+            </ProtectedRoute>
+          } />
+          <Route path="/music" element={
+            <ProtectedRoute>
+              <Music />
+            </ProtectedRoute>
+          } />
+          <Route path="/journal" element={
+            <ProtectedRoute>
+              <Journal />
+            </ProtectedRoute>
+          } />
+          <Route path="/activities" element={
+            <ProtectedRoute>
+              <Activities />
+            </ProtectedRoute>
+          } />
+          <Route path="/social" element={
+            <ProtectedRoute>
+              <Social />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/onboarding" element={
+            <ProtectedRoute>
+              <OnboardingFlow />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </main>
        <Toaster
