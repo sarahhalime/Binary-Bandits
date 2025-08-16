@@ -146,7 +146,7 @@ const Activities = () => {
         >
           {/* Main Genie Image */}
           <motion.img
-            src="/images/genie.webp"
+            src="/images/genie.png"
             alt="Wellness Genie"
             className="w-full h-full object-contain drop-shadow-2xl"
             animate={{
